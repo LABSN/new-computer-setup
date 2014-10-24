@@ -47,9 +47,8 @@ source ~/.bashrc
 ## OPEN MPI ##
 ## ## ## ## ## 
 	## TODO ##
-	## NOTE: at present (2014 August) PyTables cannot use parallelized
-	## versions of HDF5, so MPI is not really necessary. These 
-	## instructions are left here in case that changes in the future.
+	## NOTE: This is only necessary if you want to run h5py with 
+	## parallelization.
 	## Download source from http://www.open-mpi.org/ and unzip. 
 	## Google "build mpi with intel compiler" for instructions.
 	# cd /PATH/TO/UNPACKED/OPENMPI/INSTALLER
@@ -67,16 +66,12 @@ source ~/.bashrc
 ## ## ## ##
 ## NOTE: In general you should not try to compile HDF5 from source.
 ## Both serial and parallel versions of HDF5 binaries are available
-## through standard Ubuntu repositories.  At present (2014 August)
-## PyTables cannot use parallelized versions of HDF5, so just install
-## the serial versions:
+## through standard Ubuntu repositories. Here is the serial version:
 sudo apt-get install libhdf5-7 libhdf5-dev
-## If in the future parallelized versions become usable by PyTables,
-## here are the binaries:
+## Parallel OPENMPI version (recommended for use with h5py):
+# sudo apt-get install libhdf5-openmpi-7 libhdf5-openmpi-dev 
 ## Parallel MPICH version:
 # sudo apt-get install libhdf5-mpich2-7 libhdf5-mpich2-dev
-## Parallel OPENMPI version:
-# sudo apt-get install libhdf5-openmpi-7 libhdf5-openmpi-dev 
 ## If you really do need to build HDF5 from source:
 # cd /opt
 # mkdir hdf5
@@ -99,6 +94,35 @@ sudo apt-get install libhdf5-7 libhdf5-dev
 # make check-install
 # cd /opt
 # rm -Rf ./hdf5-1.8.13
+
+## ## ## ## ## ## ## ## ## ## ## ## ##
+## h5py (python interface to HDF5)  ##
+## ## ## ## ## ## ## ## ## ## ## ## ##
+## Standard installation:
+pip install --user h5py
+pip3 install --user h5py
+## Can also run parallelized, when using an mpi version of HDF5, with
+## the help of mpi4py:
+# pip install --user mpi4py
+## OR:
+# cd $builddir
+# git clone git@bitbucket.org/mpi4py/mpi4py.git
+# cd mpi4py
+# python setup.py build
+# python setup.py install --user
+
+## Now install h5py:
+# git clone git@github.com:h5py/h5py.git
+# cd h5py
+# export CC=mpicc
+# export HDF5_DIR=/path/to/hdf5
+# python setup.py build --mpi
+# python setup.py test
+# python setup.py install --user
+# cd
+## then in python, run:
+# import h5py
+# h5py.run_tests()
 
 ## ## ## ## 
 ## NUMPY ##
