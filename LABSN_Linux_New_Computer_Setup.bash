@@ -1,61 +1,96 @@
 #! /bin/bash
 ## Commands to be run when setting up a fresh system. Installs Intel MKL
-## and builds NumPy, SciPy, numexpr, and Julia with MKL backend. 
-## Installs mne-python with CUDA support. Installs HDF5, PyTables, 
-## scikit-learn, scikits.cuda, pandas, tdtpy, pyglet, expyfun, R, 
+## and builds NumPy, SciPy, numexpr, and Julia with MKL backend.
+## Installs mne-python with CUDA support. Installs HDF5, PyTables,
+## scikit-learn, scikits.cuda, pandas, tdtpy, pyglet, expyfun, R,
 ## and spyder. Includes notes on setup of freesurfer, MATLAB, and SSH.
 ## NOTE: commands indented and marked with ## TODO ## should not be run
 ## directly; they need editing or require some interaction on your part.
 
-## ## ## ## ## ## ## 
-## GENERAL SETUP  ##
-## ## ## ## ## ## ## 
-## Prerequisites for MKL, NumPy, SciPy, mne-python, PyTables, svgutils
-sudo apt-get update
-sudo apt-get install default-jre build-essential git-core cython \
-cython3 python-nose python3-nose python-coverage python3-coverage \
-python-setuptools python3-setuptools python-pycuda python3-pycuda \
-python-pip python3-pip cmake bzip2 liblzo2-2 liblzo2-dev zlib1g \
-zlib1g-dev libfreetype6-dev libpng-dev libxml2-dev libxslt1-dev
+## ## ## ## ## ##
+##  DECISIONS  ##
+## ## ## ## ## ##
+## Here you decide whether you want to use Ubuntu repositories whenever
+## possible (most conservative and stable), or prefer pip (middle ground), or
+## git (bleeding edge) when installing the various packages and prerequisites.
+## This is only a preference; not all packages are available in all modalities.
+## Comment out the ones you don't want; otherwise defaults to "git".
+preferred_source="apt-get"
+preferred_source="pip"
+preferred_source="git"
+
+## Do you want both Python 2.x and Python 3.x versions of everything?
+p2k=true
+p3k=true
 
 ## Create a directory to house your custom builds. Rename if desired.
-builddir=~/Builds
-mkdir $builddir
+build_dir="~/Builds"
+mkdir $build_dir
 
-## ## ## ## ## ## 
+## ## ## ## ## ## ##
+## GENERAL SETUP  ##
+## ## ## ## ## ## ##
+## Prerequisites for MKL, NumPy, SciPy, mne-python, PyTables, svgutils
+sudo apt-get update
+sudo apt-get install default-jre build-essential git-core cmake bzip2 \
+liblzo2-2 liblzo2-dev zlib1g zlib1g-dev libfreetype6-dev libpng-dev \
+libxml2-dev libxslt1-dev
+if [ "$preferred_source" = "apt-get" ]; then
+	if [ "$p2k" = true ]; then
+    sudo apt-get install cython python-nose python-coverage python-setuptools \
+		python-pip
+	fi
+	if [ "$p3k" = true ]; then
+		sudo apt-get install cython3 python3-nose python3-coverage \
+		python3-setuptools python3-pip
+	fi
+elif [ "$preferred_source" = "pip" ]; then
+if [ "$p2k" = true ]; then
+	sudo apt-get install python-pip
+	pip install --user Cython nose coverage setuptools
+fi
+if [ "$p3k" = true ]; then
+	sudo apt-get install python3-pip
+	pip3 install --user Cython nose coverage setuptools
+fi
+else
+	cd $build_dir
+
+fi
+## ## ## ## ## ##
 ##  INTEL MKL  ##
 ## ## ## ## ## ##
 	## TODO ##
 	## download Intel parallel studio and unzip.
 	## you really only need the MKL, C++, and Fortran compilers, but
-	## install the whole studio if you like. If you have problems, 
-	## Google "NumPy/SciPy with Intel MKL" to find Intel's guide. Pay 
+	## install the whole studio if you like. If you have problems,
+	## Google "NumPy/SciPy with Intel MKL" to find Intel's guide. Pay
 	## special attention to setting the environment variables correctly.
 	cd /PATH/TO/UNPACKED/MKL/INSTALLER
 sh install_GUI.sh
 ## do some GUI stuff...
-## Now make sure the system can find MKL. Assuming you installed to 
+## Now make sure the system can find MKL. Assuming you installed to
 ## /opt/intel (the default):
 sudo echo "/opt/intel/mkl/lib/intel64" >> /etc/ld.so.conf.d/intel-mkl.conf
 sudo echo "/opt/intel/lib/intel64" >> /etc/ld.so.conf.d/intel-mkl.conf
 echo "source /opt/intel/bin/compilervars.sh intel64" >> ~/.bashrc
 sudo ldconfig
 ## refresh the .bashrc file to get the MKL environment variables set
-source ~/.bashrc  
+source ~/.bashrc
 
-## ## ## ## ## 
+## ## ## ## ##
 ## OPEN MPI ##
-## ## ## ## ## 
+## ## ## ## ##
 	## TODO ##
 	## NOTE: at present (2014 August) PyTables cannot use parallelized
-	## versions of HDF5, so MPI is not really necessary. These 
+	## versions of HDF5, so MPI is not really necessary. These
 	## instructions are left here in case that changes in the future.
-	## Download source from http://www.open-mpi.org/ and unzip. 
+	## Download source from http://www.open-mpi.org/ and unzip.
 	## Google "build mpi with intel compiler" for instructions.
 	# cd /PATH/TO/UNPACKED/OPENMPI/INSTALLER
 	# ./configure --prefix=/usr/local CC=icc CXX=icpc FC=ifort
 	# make -j 6 all
-	# sudo bash 
+	# sudo bash
 	# make install
 	## NOTE: the "sudo bash; make install" lines are equivalent to
 	## "sudo make install", except this way the ~/.bashrc file gets
@@ -76,7 +111,7 @@ sudo apt-get install libhdf5-7 libhdf5-dev
 ## Parallel MPICH version:
 # sudo apt-get install libhdf5-mpich2-7 libhdf5-mpich2-dev
 ## Parallel OPENMPI version:
-# sudo apt-get install libhdf5-openmpi-7 libhdf5-openmpi-dev 
+# sudo apt-get install libhdf5-openmpi-7 libhdf5-openmpi-dev
 ## If you really do need to build HDF5 from source:
 # cd /opt
 # mkdir hdf5
@@ -100,10 +135,10 @@ sudo apt-get install libhdf5-7 libhdf5-dev
 # cd /opt
 # rm -Rf ./hdf5-1.8.13
 
-## ## ## ## 
+## ## ## ##
 ## NUMPY ##
 ## ## ## ##
-cd $builddir
+cd $build_dir
 git clone git://github.com/numpy/numpy.git
 cd numpy
 ## generate site.cfg
@@ -112,17 +147,17 @@ echo library_dirs = /opt/intel/mkl/lib/intel64 >> site.cfg
 echo include_dirs = /opt/intel/mkl/include >> site.cfg
 echo mkl_libs = mkl_rt >> site.cfg
 echo lapack_libs =   >> site.cfg
-## if rebuilding: 
-# rm -Rf build  
+## if rebuilding:
+# rm -Rf build
 python2 setup.py clean
 python2 setup.py config --compiler=intelem build_clib --compiler=intelem build_ext --compiler=intelem install --user
 python3 setup.py clean
 python3 setup.py config --compiler=intelem build_clib --compiler=intelem build_ext --compiler=intelem install --user
 
-## ## ## ## ## 
+## ## ## ## ##
 ## NUMEXPR  ##
 ## ## ## ## ##
-cd $builddir
+cd $build_dir
 git clone git@github.com:pydata/numexpr.git
 cd numexpr
 ## generate site.cfg (uses the same format as NumPy)
@@ -131,40 +166,40 @@ echo library_dirs = /opt/intel/mkl/lib/intel64 >> site.cfg
 echo include_dirs = /opt/intel/mkl/include >> site.cfg
 echo mkl_libs = mkl_rt >> site.cfg
 echo lapack_libs =   >> site.cfg
-## if rebuilding: 
-# rm -Rf build  
-python2 setup.py build 
+## if rebuilding:
+# rm -Rf build
+python2 setup.py build
 python2 setup.py install --user
 cd; python2 -c "import numexpr; numexpr.test()"
-## NOTE: the test() line above fails if run within $builddir/numexpr,
+## NOTE: the test() line above fails if run within $build_dir/numexpr,
 ## hence the cd to $HOME first
-cd $builddir/numexpr
-rm -Rf build  
-python3 setup.py build 
+cd $build_dir/numexpr
+rm -Rf build
+python3 setup.py build
 python3 setup.py install --user
 cd; python3 -c "import numexpr; numexpr.test()"
 
-## ## ## ## ## 
+## ## ## ## ##
 ## PYTABLES ##
 ## ## ## ## ##
-cd $builddir
+cd $build_dir
 git clone git@github.com:PyTables/PyTables.git
 cd PyTables
-## if rebuilding: 
-# make clean  
+## if rebuilding:
+# make clean
 python2 setup.py build_ext --inplace
 python2 setup.py install --user
 cd; python2 -c "import tables; tables.test()"
-cd $builddir/PyTables
+cd $build_dir/PyTables
 make clean
 python3 setup.py build_ext --inplace
 python3 setup.py install --user
 cd; python3 -c "import tables; tables.test()"
 
-## ## ## ## 
+## ## ## ##
 ## SCIPY ##
 ## ## ## ##
-cd $builddir
+cd $build_dir
 git clone git://github.com/scipy/scipy.git
 cd scipy
 python2 setup.py clean
@@ -176,7 +211,7 @@ python3 setup.py config --compiler=intelem --fcompiler=intelem build_clib --comp
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 ## MATPLOTLIB, SCIKIT-LEARN, PANDAS, SCIKITS.CUDA, TDTPY ##
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-cd $builddir
+cd $build_dir
 ## MATPLOTLIB: best-of-breed for scientific plotting in python
 ## SCIKIT-LEARN: machine learning algorithms in python
 ## PANDAS: Python data analysis library (similar to numpy record arrays)
@@ -188,7 +223,7 @@ git clone git://github.com/pydata/pandas.git
 git clone git://github.com/lebedov/scikits.cuda.git
 hg clone https://bitbucket.org/bburan/tdtpy
 for name in matplotlib scikit-learn pandas scikits.cuda tdtpy; do
-	cd $builddir/$name
+	cd $build_dir/$name
 	## TODO: check whether all these can be done with both py2 & py3
 	python setup.py install --user
 done
@@ -198,7 +233,7 @@ done
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 pip install --user patsy statsmodels seaborn
 ## or for the development version of seaborn:
-# cd $builddir
+# cd $build_dir
 # git clone git@github.com:mwaskom/seaborn.git
 # cd seaborn
 # pip install --user .
@@ -210,33 +245,33 @@ pip install --user patsy statsmodels seaborn
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 sudo apt-get install inkscape gimp libmagickwand-dev
 pip install --user tinycss cssselect cairocffi cairosvg svgutils
-## If you're likely to hack on it, svgutils can also be installed via: 
-# cd $builddir
+## If you're likely to hack on it, svgutils can also be installed via:
+# cd $build_dir
 # git clone git@github.com:btel/svg_utils.git
 # cd svg_utils
 # python setup.py install --user
 
-## ## ## ## ## 
+## ## ## ## ##
 ##  SPYDER  ##
 ## ## ## ## ##
 ## (get repo version first to get icon set, menu integration, etc, then
 ## install tip)
 pip install --user rope flake8 sphinx pylint
 sudo apt-get install spyder
-cd $builddir
+cd $build_dir
 hg clone https://spyderlib.googlecode.com/hg/ spyderlib
 cd spyderlib
 python2 setup.py install --user
 ## to update spyder:
-# cd $builddir/spyder
+# cd $build_dir/spyder
 # hg pull --update
 # python setup.py install --user
-## If you want to run python3 inside the Spyder console, it is 
+## If you want to run python3 inside the Spyder console, it is
 ## recommended to install a python3 version of Spyder (invoke as
 ## "spyder3"; it can coexist peacefully with a py2 Spyder install):
 sudo apt-get install python3-sip python3-pyqt4
 pip3 install --user rope_py3k flake8 sphinx pylint
-cd $builddir/spyderlib
+cd $build_dir/spyderlib
 python3 setup.py install --user
 
 
@@ -248,13 +283,13 @@ pip install --user --upgrade http://pyglet.googlecode.com/archive/tip.zip
 pip install --user joblib
 
 ## most people will want a typical installation like this:
-cd $builddir
+cd $build_dir
 git clone git@github.com/LABSN/expyfun.git
 cd expyfun
 python setup.py install --user
 ## if you're likely to help develop expyfun, do this instead:
 ## go to GitHub and fork LABSN/expyfun to your own git account. Then:
-# cd $builddir
+# cd $build_dir
 # git clone git@github.com/<INSERT_YOUR_GIT_USERNAME_HERE>/expyfun.git
 # cd expyfun
 # python setup.py develop --user
@@ -264,7 +299,7 @@ python setup.py install --user
 ## ## ## ## ## ##
 ## MNE-PYTHON  ##
 ## ## ## ## ## ##
-cd $builddir
+cd $build_dir
 git clone git://github.com/mne-tools/mne-python.git
 cd mne-python
 ## could use "develop" instead of "install" (no compiled code in package):
@@ -304,7 +339,7 @@ sudo nvidia-xconfig
 ## ## ## ##
 ## JULIA ##
 ## ## ## ##
-cd $builddir
+cd $build_dir
 git clone git@github.com:JuliaLang/julia.git
 cd julia
 source /opt/intel/mkl/bin/mklvars.sh intel64 ilp64
@@ -325,10 +360,10 @@ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 sudo apt-get update
 sudo apt-get install r-base r-base-dev
 	## TODO ##
-	## As of August 2014, Rstudio is not in the Ubuntu repos, 
+	## As of August 2014, Rstudio is not in the Ubuntu repos,
     ## so download the .deb from Rstudio website & install.
-	## Some (probably) useful packages to install from within R: 
-	## install.packages(c('tidyr', 'devtools', 'ez', 'ggplot2', 
+	## Some (probably) useful packages to install from within R:
+	## install.packages(c('tidyr', 'devtools', 'ez', 'ggplot2',
 	## 'Hmisc', 'lme4', 'plyr', 'reshape', 'stringi', 'zoo'))
 
 ## ## ## ## ## ##
@@ -339,23 +374,23 @@ sudo apt-get install openssh-server
 	## First make sure you're getting a static IP (check network
 	## settings for eth0). For added security, change port number to
 	## something other than 22 in /etc/ssh/sshd_config, then access via:
-	# ssh -p 1234 <username>@<hostname>.ilabs.uw.edu 
+	# ssh -p 1234 <username>@<hostname>.ilabs.uw.edu
 	## (where 1234 is the port you chose)
 
 ## RUNNING FIREFOX THROUGH AN SSH TUNNEL
 ## This sets up a pseudo-VPN for browser traffic only (useful if, e.g.,
-## you're in a foreign country that blocks some websites). To avoid 
+## you're in a foreign country that blocks some websites). To avoid
 ## changing these settings back and forth all the time, first set up a
-## new Firefox profile by running "firefox -P" on the command line. 
+## new Firefox profile by running "firefox -P" on the command line.
 ## Create a new profile with a sensible name like "ssh" or "tunnel".
 ## Start Firefox with that profile, then go to:
-## "Preferences > Advanced > Network > Settings" and choose "Manual 
+## "Preferences > Advanced > Network > Settings" and choose "Manual
 ## Proxy Configuration". Set your SOCKS host to 127.0.0.1, port 8080,
-## use SOCKS v5, and check the "Remote DNS" box. Now you can run: 
+## use SOCKS v5, and check the "Remote DNS" box. Now you can run:
 # ssh -C2qTnN -D 8080 <name>@<hostname>
 ## ...before you launch Firefox, and all your browser traffic will be
 ## routed through your <hostname> computer and encrypted. Don't forget
-## to add the flag "-p 1234" to the ssh command if you've configured 
+## to add the flag "-p 1234" to the ssh command if you've configured
 ## ssh to listen on a non-default port (as recommended above). Note that
 ## the Firefox profile editor allows you to select a default profile, so
 ## that can be an easy way to switch settings for the duration of your
@@ -363,11 +398,11 @@ sudo apt-get install openssh-server
 ## switch back and forth between tunnel and no tunnel on a regular
 ## basis, you can set your normal Firefox profile as the default, then
 ## use the following command to invoke the tunneled version (assuming
-## the name of your proxied profile is "sshtunnel"): 
+## the name of your proxied profile is "sshtunnel"):
 #ssh -C2qTnN -D 8080 <name>@<hostname> & tunnelpid=$! && sleep 3 && firefox -P sshtunnel && kill $tunnelpid
-## this will capture the PID of the SSH tunnel instance, and kill it 
+## this will capture the PID of the SSH tunnel instance, and kill it
 ## when Firefox closes normally (you'll need to close it manually if
-## Firefox crashes or is force-quit). 
+## Firefox crashes or is force-quit).
 
 ## XRDP: remote desktop server
 sudo apt-get install xrdp
@@ -417,12 +452,12 @@ sudo apt-get install mdadm
 	## TODO ##
     ## This is an example only. Customize to suit your system.
 	## This will create a RAID level=1 (mirror) at /dev/md0 comprising
-	## n=2 physical drives (sdc and sdd) 
-	sudo mdadm --create /dev/md0 -l 1 -n 2 /dev/sdc1 /dev/sdd1  
+	## n=2 physical drives (sdc and sdd)
+	sudo mdadm --create /dev/md0 -l 1 -n 2 /dev/sdc1 /dev/sdd1
 	## If the RAID had already been built previously:
-	# sudo mdadm --assemble /dev/md0 /dev/sdc1 /dev/sdd1  
+	# sudo mdadm --assemble /dev/md0 /dev/sdc1 /dev/sdd1
 ## automount at startup (edit MOUNTPT as desired):
 MOUNTPT="/media/raid"
 sudo mkdir $MOUNTPT
 UUID=sudo blkid /dev/md0 | cut -d '"' -f2
-sudo echo "UUID=$UUID $MOUNTPT ext4 defaults 0 0" >> /etc/fstab 
+sudo echo "UUID=$UUID $MOUNTPT ext4 defaults 0 0" >> /etc/fstab
