@@ -99,8 +99,11 @@ sudo apt-get install libhdf5-7 libhdf5-dev
 ## h5py (python interface to HDF5)  ##
 ## ## ## ## ## ## ## ## ## ## ## ## ##
 ## Standard installation:
-pip install --user h5py
-pip3 install --user h5py
+sudo apt-get install python-h5py
+sudo apt-get install python3-h5py
+## or install throughw pip:
+#pip install --user h5py
+#pip3 install --user h5py
 ## Can also run parallelized, when using an mpi version of HDF5, with
 ## the help of mpi4py:
 # pip install --user mpi4py
