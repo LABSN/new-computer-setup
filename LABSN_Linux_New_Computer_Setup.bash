@@ -11,17 +11,32 @@
 ##  DECISIONS  ##
 ## ## ## ## ## ##
 ## Here you decide whether you want to use Ubuntu repositories whenever
-## possible (most conservative and stable), or prefer pip (middle ground), or
-## git (bleeding edge) when installing the various packages and prerequisites.
-## This is only a preference; not all packages are available in all modalities.
-## Comment out the ones you don't want; otherwise defaults to "git".
-preferred_source="apt-get"
-preferred_source="pip"
+## possible (most conservative and stable), or prefer pip (middle
+##  ground), or git (bleeding edge) when installing the various packages
+## and prerequisites. This is only a preference; not all packages are
+## available in all modalities. Comment out the ones you don't want;
+## otherwise defaults to the Ubuntu repos (apt-get).
 preferred_source="git"
+preferred_source="pip"
+preferred_source="apt-get"
 
 ## Do you want both Python 2.x and Python 3.x versions of everything?
 p2k=true
 p3k=true
+
+## Do you have Intel MKL installed already?
+mkl=false
+
+## What version of HDF5 do you want? If you're not sure, use "serial"
+hdf_pref="source"
+hdf_pref="mpich"
+hdf_pref="openmpi"
+hdf_pref="serial"
+
+## HDF5 compiler options (only relevant if you build HDF5 from source)
+hdf_compiler="mkl"
+hdf_compiler="mpi"
+hdf_compiler="system"
 
 ## Create a directory to house your custom builds. Rename if desired.
 build_dir="~/Builds"
@@ -31,32 +46,32 @@ mkdir $build_dir
 ## GENERAL SETUP  ##
 ## ## ## ## ## ## ##
 ## Prerequisites for MKL, NumPy, SciPy, mne-python, PyTables, svgutils
+## preferred_source = "git" is not respected here, since these are low-
+## level system packages that you really don't want to be unstable.
 sudo apt-get update
 sudo apt-get install default-jre build-essential git-core cmake bzip2 \
 liblzo2-2 liblzo2-dev zlib1g zlib1g-dev libfreetype6-dev libpng-dev \
 libxml2-dev libxslt1-dev
 if [ "$preferred_source" = "apt-get" ]; then
 	if [ "$p2k" = true ]; then
-    sudo apt-get install cython python-nose python-coverage python-setuptools \
-		python-pip
+		sudo apt-get install cython python-nose python-coverage \
+		python-setuptools python-pip
 	fi
 	if [ "$p3k" = true ]; then
 		sudo apt-get install cython3 python3-nose python3-coverage \
 		python3-setuptools python3-pip
 	fi
-elif [ "$preferred_source" = "pip" ]; then
-if [ "$p2k" = true ]; then
-	sudo apt-get install python-pip
-	pip install --user Cython nose coverage setuptools
+else  #  preferred_source = "pip" or "git"
+	if [ "$p2k" = true ]; then
+		sudo apt-get install python-pip
+		pip install --user Cython nose coverage setuptools
+	fi
+	if [ "$p3k" = true ]; then
+		sudo apt-get install python3-pip
+		pip3 install --user Cython nose coverage setuptools
+	fi
 fi
-if [ "$p3k" = true ]; then
-	sudo apt-get install python3-pip
-	pip3 install --user Cython nose coverage setuptools
-fi
-else
-	cd $build_dir
 
-fi
 ## ## ## ## ## ##
 ##  INTEL MKL  ##
 ## ## ## ## ## ##
@@ -102,84 +117,91 @@ source ~/.bashrc
 ## NOTE: In general you should not try to compile HDF5 from source.
 ## Both serial and parallel versions of HDF5 binaries are available
 ## through standard Ubuntu repositories. Here is the serial version:
-sudo apt-get install libhdf5-7 libhdf5-dev
-## Parallel OPENMPI version (recommended for use with h5py):
-# sudo apt-get install libhdf5-openmpi-7 libhdf5-openmpi-dev 
-## Parallel MPICH version:
-# sudo apt-get install libhdf5-mpich2-7 libhdf5-mpich2-dev
-## If you really do need to build HDF5 from source:
-# cd /opt
-# mkdir hdf5
-## NOTE: following three lines may not be the most current version:
-# wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.13.tar.gz
-# tar -zxf hdf5-1.8.13.tar.gz
-# cd hdf5-1.8.13
-## OPTION 1: compile serial HDF5 with intel compilers
-# export CC=icc
-# export F9X=ifort
-# export CXX=icpc
-# ./configure --prefix=/opt/hdf5 --enable-fortran --enable-cxx --disable-static
-## OPTION 2: compile parallel HDF5 using MPI
-# export CC=mpicc
-# ./configure --prefix=/opt/hdf5 --disable-static
-## EITHER OPTION:
-# make -j -l6
-# make check
-# make install
-# make check-install
-# cd /opt
-# rm -Rf ./hdf5-1.8.13
-
-## ## ## ## ## ## ## ## ## ## ## ## ##
-## h5py (python interface to HDF5)  ##
-## ## ## ## ## ## ## ## ## ## ## ## ##
-## Standard installation:
-sudo apt-get install python-h5py
-sudo apt-get install python3-h5py
-## or install throughw pip:
-#pip install --user h5py
-#pip3 install --user h5py
-## Can also run parallelized, when using an mpi version of HDF5, with
-## the help of mpi4py:
-# pip install --user mpi4py
-## OR:
-# cd $build_dir
-# git clone git@bitbucket.org/mpi4py/mpi4py.git
-# cd mpi4py
-# python setup.py build
-# python setup.py install --user
-
-## Now install h5py:
-# git clone git@github.com:h5py/h5py.git
-# cd h5py
-# export CC=mpicc
-# export HDF5_DIR=/path/to/hdf5
-# python setup.py build --mpi
-# python setup.py test
-# python setup.py install --user
-# cd
-## then in python, run:
-# import h5py
-# h5py.run_tests()
+if [ "$hdf_pref" = "serial" ]; then
+	sudo apt-get install libhdf5-7 libhdf5-dev
+elif  [ "$hdf_pref" = "openmpi" ]; then
+	sudo apt-get install libhdf5-openmpi-7 libhdf5-openmpi-dev
+elif  [ "$hdf_pref" = "mpich" ]; then
+	sudo apt-get install libhdf5-mpich2-7 libhdf5-mpich2-dev
+else  # hdf_pref = "source"
+	## NOTE: next lines may need sudo if you haven't chowned /opt.
+	## NOTE: wget line may not be the most current version.
+	cd /opt
+	mkdir hdf5
+	wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.13.tar.gz
+	tar -zxf hdf5-1.8.13.tar.gz
+	cd hdf5-1.8.13
+	if [ "$hdf_compiler" = "mpi" ]; then
+		## compile parallel HDF5 using MPI
+		export CC=mpicc
+		./configure --prefix=/opt/hdf5 --disable-static
+	elif [ "$hdf_compiler" = "mkl" ]; then
+		## compile serial HDF5 with intel compilers
+		export CC=icc
+		export F9X=ifort
+		export CXX=icpc
+		./configure --prefix=/opt/hdf5 --enable-fortran --enable-cxx --disable-static
+	else  # hdf_compiler = "system"
+		## compile serial HDF5 with default system compilers
+		./configure --prefix=/opt/hdf5 --enable-fortran --enable-cxx --disable-static
+	fi
+	make -j -l6
+	make check
+	make install
+	make check-install
+	cd /opt
+	rm -Rf ./hdf5-1.8.13
+fi
 
 ## ## ## ##
 ## NUMPY ##
 ## ## ## ##
-cd $build_dir
-git clone git://github.com/numpy/numpy.git
-cd numpy
-## generate site.cfg
-echo [mkl] >> site.cfg
-echo library_dirs = /opt/intel/mkl/lib/intel64 >> site.cfg
-echo include_dirs = /opt/intel/mkl/include >> site.cfg
-echo mkl_libs = mkl_rt >> site.cfg
-echo lapack_libs =   >> site.cfg
-## if rebuilding:
-# rm -Rf build
-python2 setup.py clean
-python2 setup.py config --compiler=intelem build_clib --compiler=intelem build_ext --compiler=intelem install --user
-python3 setup.py clean
-python3 setup.py config --compiler=intelem build_clib --compiler=intelem build_ext --compiler=intelem install --user
+if [ "$preferred_source" = "apt-get" ]; then
+	if [ "$p2k" = true ]; then
+		sudo apt-get install python-numpy
+	fi
+	if [ "$p3k" = true ]; then
+		sudo apt-get install python3-numpy
+	fi
+elif [ "$preferred_source" = "pip" ]; then
+	if [ "$p2k" = true ]; then
+		pip install --user numpy
+	fi
+	if [ "$p3k" = true ]; then
+		pip3 install --user numpy
+	fi
+else  #  preferred_source = "git"
+	cd $build_dir
+	git clone git://github.com/numpy/numpy.git
+	cd numpy
+	## if rebuilding:
+	# rm -Rf build
+	if [ "$mkl" = true ]; then
+		## generate site.cfg
+		echo [mkl] >> site.cfg
+		echo library_dirs = /opt/intel/mkl/lib/intel64 >> site.cfg
+		echo include_dirs = /opt/intel/mkl/include >> site.cfg
+		echo mkl_libs = mkl_rt >> site.cfg
+		echo lapack_libs =   >> site.cfg
+		if [ "$p2k" = true ]; then
+			python2 setup.py clean
+			python2 setup.py config --compiler=intelem build_clib --compiler=intelem build_ext --compiler=intelem install --user
+		fi
+		if [ "$p3k" = true ]; then
+			python3 setup.py clean
+			python3 setup.py config --compiler=intelem build_clib --compiler=intelem build_ext --compiler=intelem install --user
+		fi
+	else  # mkl = false
+		if [ "$p2k" = true ]; then
+			python2 setup.py clean
+			python2 setup.py install --user
+		fi
+		if [ "$p3k" = true ]; then
+			python3 setup.py clean
+			python3 setup.py install --user
+		fi
+	fi
+fi
 
 ## ## ## ## ##
 ## NUMEXPR  ##
@@ -230,81 +252,197 @@ python3 setup.py config --compiler=intelem build_clib --compiler=intelem build_e
 ## ## ## ##
 ## SCIPY ##
 ## ## ## ##
-cd $build_dir
-git clone git://github.com/scipy/scipy.git
-cd scipy
-python2 setup.py clean
-python2 setup.py config --compiler=intelem --fcompiler=intelem build_clib --compiler=intelem --fcompiler=intelem build_ext --compiler=intelem --fcompiler=intelem install --user
-python3 setup.py clean
-python3 setup.py config --compiler=intelem --fcompiler=intelem build_clib --compiler=intelem --fcompiler=intelem build_ext --compiler=intelem --fcompiler=intelem install --user
-## Those SciPy compilations will take a while, go get a cup of coffee.
+if [ "$preferred_source" = "apt-get" ]; then
+	if [ "$p2k" = true ]; then
+		sudo apt-get install python-scipy
+	fi
+	if [ "$p3k" = true ]; then
+		sudo apt-get install python3-scipy
+	fi
+elif [ "$preferred_source" = "pip" ]; then
+	if [ "$p2k" = true ]; then
+		pip install --user scipy
+	fi
+	if [ "$p3k" = true ]; then
+		pip3 install --user scipy
+	fi
+else  #  preferred_source = "git"
+	cd $build_dir
+	git clone git://github.com/scipy/scipy.git
+	cd scipy
+	if [ "$mkl" = true ]; then
+		if [ "$p2k" = true ]; then
+			python2 setup.py clean
+			python2 setup.py config --compiler=intelem --fcompiler=intelem build_clib --compiler=intelem --fcompiler=intelem build_ext --compiler=intelem --fcompiler=intelem install --user
+		fi
+		if [ "$p3k" = true ]; then
+			python3 setup.py clean
+			python3 setup.py config --compiler=intelem --fcompiler=intelem build_clib --compiler=intelem --fcompiler=intelem build_ext --compiler=intelem --fcompiler=intelem install --user
+		fi
+	else  # mkl = false
+		if [ "$p2k" = true ]; then
+			python2 setup.py clean
+			python2 setup.py install --user
+		fi
+		if [ "$p3k" = true ]; then
+			python3 setup.py clean
+			python3 setup.py install --user
+		fi
+	fi
+fi
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 ## MATPLOTLIB, SCIKIT-LEARN, PANDAS, SCIKITS.CUDA, TDTPY ##
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-cd $build_dir
 ## MATPLOTLIB: best-of-breed for scientific plotting in python
 ## SCIKIT-LEARN: machine learning algorithms in python
 ## PANDAS: Python data analysis library (similar to numpy record arrays)
 ## SCIKITS.CUDA: SciPy toolkit interface to NVIDIA's CUDA libraries
 ## TDTPY:  Python wrappers for TDT's Active-X interface
-git clone git://github.com/matplotlib/matplotlib.git
-git clone git://github.com/scikit-learn/scikit-learn.git
-git clone git://github.com/pydata/pandas.git
-git clone git://github.com/lebedov/scikits.cuda.git
-hg clone https://bitbucket.org/bburan/tdtpy
-for name in matplotlib scikit-learn pandas scikits.cuda tdtpy; do
-	cd $build_dir/$name
-	## TODO: check whether all these can be done with both py2 & py3
-	python setup.py install --user
-done
+if [ "$preferred_source" = "apt-get" ]; then
+	if [ "$p2k" = true ]; then
+		# NOTE: no repo version of scikits.cuda or TDTPy available
+		sudo apt-get install python-matplotlib python-sklearn python-sklearn-lib python-pandas python-pandas-lib 
+		pip install --user scikits.cuda TDTPy
+	fi
+	if [ "$p3k" = true ]; then
+		# NOTE: no p3k version of sklearn is available in the repos
+		# NOTE: no repo version of scikits.cuda or tdtPy available
+		sudo apt-get install python3-matplotlib python3-pandas python3-pandas-lib
+		pip3 install --user scikit-learn scikits.cuda TDTPy
+	fi
+elif [ "$preferred_source" = "pip" ]; then
+	if [ "$p2k" = true ]; then
+		pip install --user matplotlib pandas scikit-learn scikits.cuda TDTPy
+	fi
+	if [ "$p3k" = true ]; then
+		pip3 install --user matplotlib pandas scikit-learn scikits.cuda TDTPy
+	fi
+else  #  preferred_source = "git"
+	cd $build_dir
+	git clone git://github.com/matplotlib/matplotlib.git
+	git clone git://github.com/scikit-learn/scikit-learn.git
+	git clone git://github.com/pydata/pandas.git
+	git clone git://github.com/lebedov/scikits.cuda.git
+	hg clone https://bitbucket.org/bburan/tdtpy
+	for name in matplotlib scikit-learn pandas scikits.cuda tdtpy; do
+		cd $build_dir/$name
+		if [ "$p2k" = true ]; then
+			python setup.py install --user
+		fi
+		if [ "$p3k" = true ]; then
+			python3 setup.py install --user
+		fi
+	done
+fi
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 ## SEABORN (data visualization package built atop matplotlib)  ##
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-pip install --user patsy statsmodels seaborn
-## or for the development version of seaborn:
-# cd $build_dir
-# git clone git@github.com:mwaskom/seaborn.git
-# cd seaborn
-# pip install --user .
-## this might also work instead of the "pip" line:
-# python setup.py develop --user
+if [ "$preferred_source" = "apt-get" ]; then
+	if [ "$p2k" = true ]; then
+		sudo apt-get install python-patsy python-statsmodels python-statsmodels-lib python-seaborn
+	fi
+	if [ "$p3k" = true ]; then
+		# NOTE: no p3k version of statsmodels in repo
+		sudo apt-get install python3-patsy python3-seaborn
+	fi
+elif [ "$preferred_source" = "pip" ]; then
+	if [ "$p2k" = true ]; then
+		pip install --user patsy statsmodels seaborn
+	fi
+	if [ "$p3k" = true ]; then
+		# NOTE: no p3k version of statsmodels in repo; pip3 may not work
+		pip3 install --user patsy statsmodels seaborn
+	fi
+else  #  preferred_source = "git"
+	cd $build_dir
+	git clone git@github.com:pydata/patsy.git
+	git clone git@github.com:statsmodels/statsmodels.git
+	git clone git@github.com:mwaskom/seaborn.git
+	for name in patsy statsmodels seaborn; do
+		cd $build_dir/$name
+		if [ "$p2k" = true ]; then
+			python setup.py install --user
+		fi
+		if [ "$p3k" = true ]; then
+			python3 setup.py install --user
+		fi
+	done
+fi
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 ##  IMAGE PROCESSING / FIGURE CREATION HELPERS  ##
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 sudo apt-get install inkscape gimp libmagickwand-dev
-pip install --user tinycss cssselect cairocffi cairosvg svgutils
-## If you're likely to hack on it, svgutils can also be installed via:
-# cd $build_dir
-# git clone git@github.com:btel/svg_utils.git
-# cd svg_utils
-# python setup.py install --user
+if [ "$preferred_source" = "apt-get" ]; then
+	if [ "$p2k" = true ]; then
+		sudo apt-get install python-cairosvg python-cssselect
+		pip install --user tinycss cairocffi svgutils
+	fi
+	if [ "$p3k" = true ]; then
+		sudo apt-get install python3-cairosvg
+		pip3 install --user tinycss cssselect cairocffi svgutils
+	fi
+elif [ "$preferred_source" = "pip" ]; then
+	if [ "$p2k" = true ]; then
+		pip install --user tinycss cssselect cairocffi cairosvg svgutils
+	fi
+	if [ "$p3k" = true ]; then
+		pip3 install --user tinycss cssselect cairocffi cairosvg svgutils
+	fi
+else  #  preferred_source = "git"
+	cd $build_dir
+	git clone git@github.com:SimonSapin/tinycss.git
+	git clone git@github.com:SimonSapin/cssselect.git
+	git clone git@github.com:SimonSapin/cairocffi.git
+	git clone git@github.com:Kozea/CairoSVG.git
+	git clone git@github.com:btel/svg_utils.git
+	for name in tinycss cssseleect cairocffi CairoSVG svg_utils; do
+		cd $build_dir/$name
+		if [ "$p2k" = true ]; then
+			python setup.py install --user
+		fi
+		if [ "$p3k" = true ]; then
+			python3 setup.py install --user
+		fi
+	done
+fi
 
 ## ## ## ## ##
 ##  SPYDER  ##
 ## ## ## ## ##
 ## (get repo version first to get icon set, menu integration, etc, then
 ## install tip)
-pip install --user rope flake8 sphinx pylint
-sudo apt-get install spyder
-cd $build_dir
-hg clone https://spyderlib.googlecode.com/hg/ spyderlib
-cd spyderlib
-python2 setup.py install --user
+if [ "$preferred_source" = "apt-get" ]; then
+	if [ "$p2k" = true ]; then
+		sudo apt-get install python-rope python-flake8 python-sphinx pylint pyflakes python-sip python-qt4 spyder
+	fi
+	if [ "$p3k" = true ]; then
+		sudo apt-get install python3-rope python3-flake8 python3-sphinx pylint pyflakes python3-sip python3-pyqt4 spyder3
+	fi
+elif [ "$preferred_source" = "pip" ]; then
+	if [ "$p2k" = true ]; then
+		pip install --user rope flake8 sphinx pylint
+	fi
+	if [ "$p3k" = true ]; then
+		pip3 install --user rope_py3k flake8 sphinx pylint
+	fi
+else  #  preferred_source = "git"
+	cd $build_dir
+	hg clone https://spyderlib.googlecode.com/hg/ spyderlib
+	cd spyderlib
+	if [ "$p2k" = true ]; then
+		python2 setup.py install --user
+	fi
+	if [ "$p3k" = true ]; then
+		python3 setup.py install --user
+	fi
+fi
 ## to update spyder:
 # cd $build_dir/spyder
 # hg pull --update
 # python setup.py install --user
-## If you want to run python3 inside the Spyder console, it is
-## recommended to install a python3 version of Spyder (invoke as
-## "spyder3"; it can coexist peacefully with a py2 Spyder install):
-sudo apt-get install python3-sip python3-pyqt4
-pip3 install --user rope_py3k flake8 sphinx pylint
-cd $build_dir/spyderlib
-python3 setup.py install --user
-
 
 ## ## ## ## ##
 ## EXPYFUN  ##
