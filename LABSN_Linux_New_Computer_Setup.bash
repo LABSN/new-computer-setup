@@ -47,9 +47,8 @@ source ~/.bashrc
 ## OPEN MPI ##
 ## ## ## ## ## 
 	## TODO ##
-	## NOTE: at present (2014 August) PyTables cannot use parallelized
-	## versions of HDF5, so MPI is not really necessary. These 
-	## instructions are left here in case that changes in the future.
+	## NOTE: This is only necessary if you want to run h5py with 
+	## parallelization.
 	## Download source from http://www.open-mpi.org/ and unzip. 
 	## Google "build mpi with intel compiler" for instructions.
 	# cd /PATH/TO/UNPACKED/OPENMPI/INSTALLER
@@ -67,16 +66,12 @@ source ~/.bashrc
 ## ## ## ##
 ## NOTE: In general you should not try to compile HDF5 from source.
 ## Both serial and parallel versions of HDF5 binaries are available
-## through standard Ubuntu repositories.  At present (2014 August)
-## PyTables cannot use parallelized versions of HDF5, so just install
-## the serial versions:
+## through standard Ubuntu repositories. Here is the serial version:
 sudo apt-get install libhdf5-7 libhdf5-dev
-## If in the future parallelized versions become usable by PyTables,
-## here are the binaries:
+## Parallel OPENMPI version (recommended for use with h5py):
+# sudo apt-get install libhdf5-openmpi-7 libhdf5-openmpi-dev 
 ## Parallel MPICH version:
 # sudo apt-get install libhdf5-mpich2-7 libhdf5-mpich2-dev
-## Parallel OPENMPI version:
-# sudo apt-get install libhdf5-openmpi-7 libhdf5-openmpi-dev 
 ## If you really do need to build HDF5 from source:
 # cd /opt
 # mkdir hdf5
@@ -100,6 +95,38 @@ sudo apt-get install libhdf5-7 libhdf5-dev
 # cd /opt
 # rm -Rf ./hdf5-1.8.13
 
+## ## ## ## ## ## ## ## ## ## ## ## ##
+## h5py (python interface to HDF5)  ##
+## ## ## ## ## ## ## ## ## ## ## ## ##
+## Standard installation:
+sudo apt-get install python-h5py
+sudo apt-get install python3-h5py
+## or install throughw pip:
+#pip install --user h5py
+#pip3 install --user h5py
+## Can also run parallelized, when using an mpi version of HDF5, with
+## the help of mpi4py:
+# pip install --user mpi4py
+## OR:
+# cd $builddir
+# git clone git@bitbucket.org/mpi4py/mpi4py.git
+# cd mpi4py
+# python setup.py build
+# python setup.py install --user
+
+## Now install h5py:
+# git clone git@github.com:h5py/h5py.git
+# cd h5py
+# export CC=mpicc
+# export HDF5_DIR=/path/to/hdf5
+# python setup.py build --mpi
+# python setup.py test
+# python setup.py install --user
+# cd
+## then in python, run:
+# import h5py
+# h5py.run_tests()
+
 ## ## ## ## 
 ## NUMPY ##
 ## ## ## ##
@@ -122,44 +149,48 @@ python3 setup.py config --compiler=intelem build_clib --compiler=intelem build_e
 ## ## ## ## ## 
 ## NUMEXPR  ##
 ## ## ## ## ##
-cd $builddir
-git clone git@github.com:pydata/numexpr.git
-cd numexpr
+## NumExpr is no longer needed since PyTables is no longer used by
+## expyfun. 
+# cd $builddir
+# git clone git@github.com:pydata/numexpr.git
+# cd numexpr
 ## generate site.cfg (uses the same format as NumPy)
-echo [mkl] >> site.cfg
-echo library_dirs = /opt/intel/mkl/lib/intel64 >> site.cfg
-echo include_dirs = /opt/intel/mkl/include >> site.cfg
-echo mkl_libs = mkl_rt >> site.cfg
-echo lapack_libs =   >> site.cfg
+# echo [mkl] >> site.cfg
+# echo library_dirs = /opt/intel/mkl/lib/intel64 >> site.cfg
+# echo include_dirs = /opt/intel/mkl/include >> site.cfg
+# echo mkl_libs = mkl_rt >> site.cfg
+# echo lapack_libs =   >> site.cfg
 ## if rebuilding: 
 # rm -Rf build  
-python2 setup.py build 
-python2 setup.py install --user
-cd; python2 -c "import numexpr; numexpr.test()"
+# python2 setup.py build 
+# python2 setup.py install --user
+# cd; python2 -c "import numexpr; numexpr.test()"
 ## NOTE: the test() line above fails if run within $builddir/numexpr,
 ## hence the cd to $HOME first
-cd $builddir/numexpr
-rm -Rf build  
-python3 setup.py build 
-python3 setup.py install --user
-cd; python3 -c "import numexpr; numexpr.test()"
+# cd $builddir/numexpr
+# rm -Rf build  
+# python3 setup.py build 
+# python3 setup.py install --user
+# cd; python3 -c "import numexpr; numexpr.test()"
 
 ## ## ## ## ## 
 ## PYTABLES ##
 ## ## ## ## ##
-cd $builddir
-git clone git@github.com:PyTables/PyTables.git
-cd PyTables
+## PyTables is no longer a dependency of expyfun. It has been replaced
+## by h5py.
+# cd $builddir
+# git clone git@github.com:PyTables/PyTables.git
+# cd PyTables
 ## if rebuilding: 
 # make clean  
-python2 setup.py build_ext --inplace
-python2 setup.py install --user
-cd; python2 -c "import tables; tables.test()"
-cd $builddir/PyTables
-make clean
-python3 setup.py build_ext --inplace
-python3 setup.py install --user
-cd; python3 -c "import tables; tables.test()"
+# python2 setup.py build_ext --inplace
+# python2 setup.py install --user
+# cd; python2 -c "import tables; tables.test()"
+# cd $builddir/PyTables
+# make clean
+# python3 setup.py build_ext --inplace
+# python3 setup.py install --user
+# cd; python3 -c "import tables; tables.test()"
 
 ## ## ## ## 
 ## SCIPY ##
@@ -267,7 +298,7 @@ python setup.py install --user
 cd $builddir
 git clone git://github.com/mne-tools/mne-python.git
 cd mne-python
-## could use "develop" instead of "install" (no compiled code in package):
+## can use "develop" instead of "install" (no compiled code in package):
 python setup.py install --user
 ## set up mne-python to use CUDA. Note that "331" was the most current
 ## version at time of writing; check to see what is most appropriate for
@@ -366,7 +397,7 @@ sudo apt-get install openssh-server
 ## the name of your proxied profile is "sshtunnel"): 
 #ssh -C2qTnN -D 8080 <name>@<hostname> & tunnelpid=$! && sleep 3 && firefox -P sshtunnel && kill $tunnelpid
 ## this will capture the PID of the SSH tunnel instance, and kill it 
-## when Firefox closes normally (you'll need to close it manually if
+## when Firefox closes normally (you'll need to kill it manually if
 ## Firefox crashes or is force-quit). 
 
 ## XRDP: remote desktop server
@@ -422,7 +453,7 @@ sudo apt-get install mdadm
 	## If the RAID had already been built previously:
 	# sudo mdadm --assemble /dev/md0 /dev/sdc1 /dev/sdd1  
 ## automount at startup (edit MOUNTPT as desired):
-MOUNTPT="/media/raid"
+MOUNTPT="/media/$USER/raid"
 sudo mkdir $MOUNTPT
 UUID=sudo blkid /dev/md0 | cut -d '"' -f2
 sudo echo "UUID=$UUID $MOUNTPT ext4 defaults 0 0" >> /etc/fstab 
