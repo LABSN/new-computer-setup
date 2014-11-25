@@ -10,106 +10,125 @@
 ## ## ## ## ## ##
 ##  DECISIONS  ##
 ## ## ## ## ## ##
-## Here you decide whether you want to use Ubuntu repositories whenever
-## possible (most conservative and stable), or prefer pip (middle
-##  ground), or git (bleeding edge) when installing the various packages
-## and prerequisites. This is only a preference; not all packages are
-## available in all modalities. Comment out the ones you don't want;
-## otherwise defaults to the Ubuntu repos (apt-get).
-preferred_source="git"
-preferred_source="pip"
-preferred_source="apt-get"
+## Here you decide whether you want to use Ubuntu repositories (most
+## conservative and stable), pip / PPA (middle ground), or git (bleeding
+## edge) when installing the various packages and prerequisites, and
+## specify any other installation options. The comments tell you which
+## choices are available and what they mean. In all cases you can also
+## specify "none" (or the empty string) if you don't want it installed
+## at all, but be aware that many of the early-listed items are
+## prerequisites for items further down the list.
+
+## Do you have Intel MKL installed already?
+mkl=false
 
 ## Do you want both Python 2.x and Python 3.x versions of everything?
 p2k=true
 p3k=true
 
-## Do you have Intel MKL installed already?
-mkl=false
-
-## What version of HDF5 do you want? If you're not sure, use "serial"
-hdf_pref="source"
-hdf_pref="mpich"
-hdf_pref="openmpi"
-hdf_pref="serial"
-
-## HDF5 compiler options (only relevant if you build HDF5 from source)
-hdf_compiler="mkl"
-hdf_compiler="mpi"
-hdf_compiler="system"
-
-## Create a directory to house your custom builds. Rename if desired.
+## Create a directory to house any custom builds. Rename if desired.
 build_dir="~/Builds"
 mkdir $build_dir
+
+## HDF5 OPTIONS
+## "serial", "openmpi", and "mpich" are all Ubuntu repository options,
+## the latter two being parallel versions. If opting for parallel, 
+## "openmpi" is recommended. Compiling from source is also possible, but
+## not really necessary; you can compile against Intel MKL ("intel"), 
+## OpenMPI ("source-mpi"), or the default system compilers ("system").
+hdf="serial"
+
+## OPEN MPI: Only necessary with HDF5 options "openmpi" or "source-mpi".
+## Options are "intel" or "system" for the choice of compilers.
+mpi="system"
+mpi_prefix="/usr/local"
+
+## NUMPY & SCIPY OPTIONS: "repo", "pip", "git", & "mkl". mkl implies git
+numpy="repo"
+scipy="repo"
+
+## All of the following have the same choices: "repo", "pip", or "git".
+mpl="repo"    # MATPLOTLIB: best-of-breed scientific plotting in python
+pd="repo"     # PANDAS: Python data analysis library
+skl="repo"    # SCIKIT-LEARN: machine learning algorithms in python
+sea="repo"    # SEABORN: data visualization package built atop matplotlib
+svgu="repo"   # SVG Utils: python tools for combining & manipulating SVGs
+spyder="repo" # SYPDER: Python IDE tailored to scientific users
+
+## The following aren't available in the Ubuntu repos, so the only
+## choices are "pip" or "git".
+skc="pip"  # SCIKITS.CUDA: SciPy toolkit interface to NVIDIA's CUDA libraries
+tdt="pip"  # TDTPY:  Python wrappers for TDT's Active-X interface
+
+## IMAGE PROCESSING APPS: inkscape, gimp, & image magick are repo-only,
+## so just need a boolean for whether to install them or not:
+ink=true
+gimp=true
+magick=true
+
+## DEPRECATED OPTIONS
+# numexpr=true
+# pytables=true
+
+## EXPYFUN and MNEFUN: Both come from GitHub. Options are "normal" or
+## "dev"; choose "dev" if you are likely to modify / contribute to the
+## codebase, in addition to using it to run your experiments / analysis.
+expyfun="install"
+mnefun="install"
+
+## R and JULIA: Statistical programming environments. Options for R are
+## "repo" and "cran", with "cran" being recommended (runs through
+## apt-get, but adds a new source to /etc/apt/sources.list). Options for
+## Julia are "repo", "ppa", "git", and "mkl". mkl implies git. The PPA
+## is run by a former LABS^N member, and so is less of a risk/unknown
+## than most PPAs are.
+rlang="cran" 
+julia="ppa"
 
 ## ## ## ## ## ## ##
 ## GENERAL SETUP  ##
 ## ## ## ## ## ## ##
-## Prerequisites for MKL, NumPy, SciPy, mne-python, PyTables, svgutils
-## preferred_source = "git" is not respected here, since these are low-
-## level system packages that you really don't want to be unstable.
+## These are general prerequisites that any system should probably have.
+## Repo versions are typically best here, although installing through
+## pip is possible for the python-related ones, as shown in the
+## commented-out lines below.
 sudo apt-get update
-sudo apt-get install default-jre build-essential git-core cmake bzip2 \
-liblzo2-2 liblzo2-dev zlib1g zlib1g-dev libfreetype6-dev libpng-dev \
-libxml2-dev libxslt1-dev
-if [ "$preferred_source" = "apt-get" ]; then
-	if [ "$p2k" = true ]; then
-		sudo apt-get install cython python-nose python-coverage \
-		python-setuptools python-pip
-	fi
-	if [ "$p3k" = true ]; then
-		sudo apt-get install cython3 python3-nose python3-coverage \
-		python3-setuptools python3-pip
-	fi
-else  #  preferred_source = "pip" or "git"
-	if [ "$p2k" = true ]; then
-		sudo apt-get install python-pip
-		pip install --user Cython nose coverage setuptools
-	fi
-	if [ "$p3k" = true ]; then
-		sudo apt-get install python3-pip
-		pip3 install --user Cython nose coverage setuptools
-	fi
+sudo apt-get install default-jre build-essential git-core cmake bzip2 liblzo2-2 liblzo2-dev zlib1g zlib1g-dev libfreetype6-dev libpng-dev libxml2-dev libxslt1-dev
+if [ "$p2k" = true ]; then
+	sudo apt-get install cython python-nose python-coverage python-setuptools python-pip
 fi
-
-## ## ## ## ## ##
-##  INTEL MKL  ##
-## ## ## ## ## ##
-	## TODO ##
-	## download Intel parallel studio and unzip.
-	## you really only need the MKL, C++, and Fortran compilers, but
-	## install the whole studio if you like. If you have problems,
-	## Google "NumPy/SciPy with Intel MKL" to find Intel's guide. Pay
-	## special attention to setting the environment variables correctly.
-	cd /PATH/TO/UNPACKED/MKL/INSTALLER
-sh install_GUI.sh
-## do some GUI stuff...
-## Now make sure the system can find MKL. Assuming you installed to
-## /opt/intel (the default):
-sudo echo "/opt/intel/mkl/lib/intel64" >> /etc/ld.so.conf.d/intel-mkl.conf
-sudo echo "/opt/intel/lib/intel64" >> /etc/ld.so.conf.d/intel-mkl.conf
-echo "source /opt/intel/bin/compilervars.sh intel64" >> ~/.bashrc
-sudo ldconfig
-## refresh the .bashrc file to get the MKL environment variables set
-source ~/.bashrc
+if [ "$p3k" = true ]; then
+	sudo apt-get install cython3 python3-nose python3-coverage python3-setuptools python3-pip
+fi
+# pip install --user Cython nose coverage setuptools
+# pip3 install --user Cython nose coverage setuptools
 
 ## ## ## ## ##
 ## OPEN MPI ##
 ## ## ## ## ##
-	## TODO ##
-	## NOTE: This is only necessary if you want to run h5py with 
-	## parallelization.
-	## Download source from http://www.open-mpi.org/ and unzip. 
-	## Google "build mpi with intel compiler" for instructions.
-	# cd /PATH/TO/UNPACKED/OPENMPI/INSTALLER
-	# ./configure --prefix=/usr/local CC=icc CXX=icpc FC=ifort
-	# make -j 6 all
-	# sudo bash
-	# make install
+if [ "$hdf" = "openmpi" ] || [ "$hdf" = "source-mpi" ]
+	## TODO: Version 1.8.3 (current as of 2014-11-25) 
+	cd
+	wget http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.3.tar.gz
+	tar -zxf openmpi-1.8.3.tar.gz
+	cd openmpi-1.8.3
+	if [ "$mpi" = "intel" ]
+		./configure --prefix=$mpi_prefix CC=icc CXX=icpc FC=ifort
+	else
+		./configure --prefix=$mpi_prefix
+	fi
+	make -j 6 all
+	sudo bash
+	make install
 	## NOTE: the "sudo bash; make install" lines are equivalent to
 	## "sudo make install", except this way the ~/.bashrc file gets
 	## loaded first (which is not normally the case with sudo commands).
 	## That way, the intel compiler dirs are on the path during install.
+	rm ~/openmpi-1.8.3.tar.gz
+	rm -r ~/openmpi-1.8.3
+fi
+
+# TODO: resume here.
 
 ## ## ## ##
 ## HDF5  ##
