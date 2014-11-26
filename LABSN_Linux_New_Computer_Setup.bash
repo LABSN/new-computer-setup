@@ -1,11 +1,13 @@
 #! /bin/bash
-## Commands to be run when setting up a fresh system. Installs Intel MKL
-## and builds NumPy, SciPy, numexpr, and Julia with MKL backend.
-## Installs mne-python with CUDA support. Installs HDF5, PyTables,
-## scikit-learn, scikits.cuda, pandas, tdtpy, pyglet, expyfun, R,
-## and spyder. Includes notes on setup of freesurfer, MATLAB, and SSH.
-## NOTE: commands indented and marked with ## TODO ## should not be run
-## directly; they need editing or require some interaction on your part.
+## Commands to be run when setting up a fresh system. If you intend to
+## install Intel MKL, you should do so *BEFORE* running this script, and
+## then set the "mkl" variable to "true" in order to compile against the
+## MKL libraries: 
+mkl=false
+
+## This script does *NOT* install MKL, MATLAB or Freesurfer. Information
+## on MATLAB installation for LABS^N members is available on the lab
+## wiki. Freesurfer's website has thorough instructions on installation.
 
 ## ## ## ## ## ##
 ##  DECISIONS  ##
@@ -18,9 +20,6 @@
 ## specify "none" (or the empty string) if you don't want it installed
 ## at all, but be aware that many of the early-listed items are
 ## prerequisites for items further down the list.
-
-## Do you have Intel MKL installed already?
-mkl=false
 
 ## Do you want both Python 2.x and Python 3.x versions of everything?
 p2k=true
