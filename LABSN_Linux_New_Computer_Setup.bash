@@ -36,12 +36,20 @@ mkdir $build_dir
 ## "openmpi" is recommended. Compiling from source is also possible, but
 ## not really necessary; you can compile against Intel MKL ("intel"), 
 ## OpenMPI ("source-mpi"), or the default system compilers ("system").
+## TODO: Uses version 1.8.13 (current as of 2014-11-25). If not
+## installing from repos, check for newer version. Make sure to get
+## .tar.gz, not .tar.bz2
 hdf="serial"
+hdf_prefix="/opt"  # a sub-folder "hdf5" will be created here automatically
+hdf_url="http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.13.tar.gz"
 
 ## OPEN MPI: Only necessary with HDF5 options "openmpi" or "source-mpi".
 ## Options are "intel" or "system" for the choice of compilers.
+## TODO: Uses version 1.8.3 (current as of 2014-11-25). Check for newer
+## version. Make sure to get .tar.gz and not .tar.bz2. 
 mpi="system"
 mpi_prefix="/usr/local"
+mpi_url="http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.3.tar.gz"
 
 ## NUMPY & SCIPY OPTIONS: "repo", "pip", "git", & "mkl". mkl implies git
 numpy="repo"
@@ -106,16 +114,17 @@ fi
 ## ## ## ## ##
 ## OPEN MPI ##
 ## ## ## ## ##
-if [ "$hdf" = "openmpi" ] || [ "$hdf" = "source-mpi" ]
-	## TODO: Version 1.8.3 (current as of 2014-11-25) 
+if [ "$hdf" = "openmpi" ] || [ "$hdf" = "source-mpi" ]; then
+	mpi_archive="${mpi_url##*/}"
+	mpi_folder="${mpi_archive%.tar.gz}"
 	cd
-	wget http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.3.tar.gz
-	tar -zxf openmpi-1.8.3.tar.gz
-	cd openmpi-1.8.3
-	if [ "$mpi" = "intel" ]
-		./configure --prefix=$mpi_prefix CC=icc CXX=icpc FC=ifort
+	wget "$mpi_url"
+	tar -zxf "$mpi_archive"
+	cd "$mpi_folder"
+	if [ "$mpi" = "intel" ]; then
+		./configure --prefix="$mpi_prefix" CC=icc CXX=icpc FC=ifort
 	else
-		./configure --prefix=$mpi_prefix
+		./configure --prefix="$mpi_prefix"
 	fi
 	make -j 6 all
 	sudo bash
@@ -124,53 +133,49 @@ if [ "$hdf" = "openmpi" ] || [ "$hdf" = "source-mpi" ]
 	## "sudo make install", except this way the ~/.bashrc file gets
 	## loaded first (which is not normally the case with sudo commands).
 	## That way, the intel compiler dirs are on the path during install.
-	rm ~/openmpi-1.8.3.tar.gz
-	rm -r ~/openmpi-1.8.3
+	rm "~/$mpi_archive"
+	rm -Rf "~/$mpi_folder"
 fi
-
-# TODO: resume here.
 
 ## ## ## ##
 ## HDF5  ##
 ## ## ## ##
-## NOTE: In general you should not try to compile HDF5 from source.
-## Both serial and parallel versions of HDF5 binaries are available
-## through standard Ubuntu repositories. Here is the serial version:
-if [ "$hdf_pref" = "serial" ]; then
-	sudo apt-get install libhdf5-7 libhdf5-dev
-elif  [ "$hdf_pref" = "openmpi" ]; then
-	sudo apt-get install libhdf5-openmpi-7 libhdf5-openmpi-dev
-elif  [ "$hdf_pref" = "mpich" ]; then
-	sudo apt-get install libhdf5-mpich2-7 libhdf5-mpich2-dev
-else  # hdf_pref = "source"
-	## NOTE: next lines may need sudo if you haven't chowned /opt.
-	## NOTE: wget line may not be the most current version.
-	cd /opt
-	mkdir hdf5
-	wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.13.tar.gz
-	tar -zxf hdf5-1.8.13.tar.gz
-	cd hdf5-1.8.13
-	if [ "$hdf_compiler" = "mpi" ]; then
-		## compile parallel HDF5 using MPI
+if ["$hdf" = "source-mpi" ] || ["$hdf" = "intel" ] || ["$hdf" = "system" ]; then
+	hdf_archive=${hdf_url##*/}
+	hdf_folder=${hdf_archive%.tar.gz}
+	cd "$hdf_prefix"
+	mkdir "hdf5"
+	cd
+	wget "$hdf_url"
+	tar -zxf "$hdf_archive"
+	cd "$hdf_folder"
+	if ["$hdf" = "source-mpi" ]; then
 		export CC=mpicc
-		./configure --prefix=/opt/hdf5 --disable-static
-	elif [ "$hdf_compiler" = "mkl" ]; then
-		## compile serial HDF5 with intel compilers
-		export CC=icc
-		export F9X=ifort
-		export CXX=icpc
-		./configure --prefix=/opt/hdf5 --enable-fortran --enable-cxx --disable-static
-	else  # hdf_compiler = "system"
-		## compile serial HDF5 with default system compilers
-		./configure --prefix=/opt/hdf5 --enable-fortran --enable-cxx --disable-static
+		./configure --prefix="$hdf_prefix/hdf5" --disable-static
+	else  # $hdf = "intel" or "system"
+		if ["$hdf" = "intel" ]; then
+			export CC=icc
+			export F9X=ifort
+			export CXX=icpc
+		fi
+		./configure --prefix="$hdf_prefix/hdf5" --enable-fortran --enable-cxx --disable-static
 	fi
 	make -j -l6
 	make check
 	make install
 	make check-install
-	cd /opt
-	rm -Rf ./hdf5-1.8.13
+	cd 
+	rm "~/$hdf_archive"
+	rm -Rf "~/$hdf_folder"
+elif ["$hdf" = "mpich" ]; then
+	sudo apt-get install libhdf5-mpich2-7 libhdf5-mpich2-dev
+elif ["$hdf" = "openmpi" ]; then
+	sudo apt-get install libhdf5-openmpi-7 libhdf5-openmpi-dev
+else  # $hdf = "serial"
+	sudo apt-get install libhdf5-7 libhdf5-dev
 fi
+
+# TODO: resume here.
 
 ## ## ## ##
 ## NUMPY ##
