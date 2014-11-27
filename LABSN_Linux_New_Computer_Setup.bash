@@ -796,8 +796,6 @@ elif [ $julia = "git" ] || [ $julia = "mkl" ]; then
 	echo export PATH="$(pwd):$PATH" >> ~/.bashrc
 fi
 
-# TODO: WIP progress marker. Code beyond this point not finished yet.
-
 ## ## ##
 ## R  ##
 ## ## ##
@@ -807,102 +805,6 @@ sudo echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" >> \
 /etc/apt/sources.list
 sudo apt-get update
 sudo apt-get install r-base r-base-dev
-## Some (probably) useful packages to install from within R:
-## install.packages(c('tidyr', 'devtools', 'ez', 'ggplot2',
-## 'Hmisc', 'lme4', 'plyr', 'reshape', 'stringi', 'zoo'))
+Rscript -e "install.packages(c('tidyr', 'devtools', 'ez', 'ggplot2', \
+'Hmisc', 'lme4', 'plyr', 'reshape', 'stringi', 'zoo'))"
 
-## ## ## ## ## ##
-## NETWORKING  ##
-## ## ## ## ## ##
-sudo apt-get install openssh-server
-	## TODO ##
-	## First make sure you're getting a static IP (check network
-	## settings for eth0). For added security, change port number to
-	## something other than 22 in /etc/ssh/sshd_config, then access via:
-	# ssh -p 1234 <username>@<hostname>.ilabs.uw.edu
-	## (where 1234 is the port you chose)
-
-## RUNNING FIREFOX THROUGH AN SSH TUNNEL
-## This sets up a pseudo-VPN for browser traffic only (useful if, e.g.,
-## you're in a foreign country that blocks some websites). To avoid
-## changing these settings back and forth all the time, first set up a
-## new Firefox profile by running "firefox -P" on the command line.
-## Create a new profile with a sensible name like "ssh" or "tunnel".
-## Start Firefox with that profile, then go to:
-## "Preferences > Advanced > Network > Settings" and choose "Manual
-## Proxy Configuration". Set your SOCKS host to 127.0.0.1, port 8080,
-## use SOCKS v5, and check the "Remote DNS" box. Now you can run:
-# ssh -C2qTnN -D 8080 <name>@<hostname>
-## ...before you launch Firefox, and all your browser traffic will be
-## routed through your <hostname> computer and encrypted. Don't forget
-## to add the flag "-p 1234" to the ssh command if you've configured
-## ssh to listen on a non-default port (as recommended above). Note that
-## the Firefox profile editor allows you to select a default profile, so
-## that can be an easy way to switch settings for the duration of your
-## journey abroad, then switch back upon returning home. If you need to
-## switch back and forth between tunnel and no tunnel on a regular
-## basis, you can set your normal Firefox profile as the default, then
-## use the following command to invoke the tunneled version (assuming
-## the name of your proxied profile is "sshtunnel"):
-#ssh -C2qTnN -D 8080 <name>@<hostname> & tunnelpid=$! && sleep 3 && firefox -P sshtunnel && kill $tunnelpid
-## this will capture the PID of the SSH tunnel instance, and kill it
-## when Firefox closes normally (you'll need to close it manually if
-## Firefox crashes or is force-quit).
-
-## XRDP: remote desktop server
-sudo apt-get install xrdp
-## Setting up your machine as a VPN server is a pain.
-## see instructions here if you must do it anyway:
-## http://openvpn.net/index.php/open-source/documentation/howto.html
-## these commands will get you started...
-# sudo apt-get install openvpn bridge-utils easy-rsa
-# sudo cp -r /usr/share/easy-rsa /etc/openvpn/
-# sudo chown -R $USER /etc/openvpn/easy-rsa
-	## TODO ##
-	## now edit /etc/openvpn/easy-rsa/vars
-	## in particular, set VPN port to 2345 (or whatever you want)
-	# cd /etc/openvpn/easy-rsa
-	# . ./vars
-	# ./clean-all
-	# ./build-ca
-	# ./build-key-server
-	# ./build-key-pass MyClientCPUName
-	# ./build-dh
-	## move client keys to client machine
-	## set up VPN autostart
-
-## ## ## ## ##
-## FIREWALL ##
-## ## ## ## ##
-## NOTE: you don't strictly NEED to set up a firewall, as *NIX is pretty
-## careful about what it allows in. This is especially true if you set
-## SSH to reject password-based connections and only use preshared keys.
-## Nonetheless, if you want to set up a strong firewall, this is a good
-## starting point:
-## (port numbers should match what you set for SSH and VPN above)
-# sudo iptables -A INPUT -p tcp --dport 1234 -j ACCEPT  # incoming SSH
-# sudo iptables -A INPUT -p tcp --sport 1234 -j ACCEPT  # outgoing SSH
-# sudo iptables -A INPUT -p udp -m udp --dport 2345 -j ACCEPT  # incoming VPN
-# sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT  # incoming web traffic
-## probably will also need a line for the default HTTPS port (and
-## possibly others). Google is your friend here. Finally, add a line to
-## reject everything not explicitly allowed above. You will need to save
-## changes (again, see Google for different ways to do this) otherwise
-## the settings will only last for the current login session.
-
-## ## ## ##
-## RAID  ##
-## ## ## ##
-sudo apt-get install mdadm
-	## TODO ##
-    ## This is an example only. Customize to suit your system.
-	## This will create a RAID level=1 (mirror) at /dev/md0 comprising
-	## n=2 physical drives (sdc and sdd)
-	sudo mdadm --create /dev/md0 -l 1 -n 2 /dev/sdc1 /dev/sdd1
-	## If the RAID had already been built previously:
-	# sudo mdadm --assemble /dev/md0 /dev/sdc1 /dev/sdd1
-## automount at startup (edit MOUNTPT as desired):
-MOUNTPT="/media/raid"
-sudo mkdir $MOUNTPT
-UUID=sudo blkid /dev/md0 | cut -d '"' -f2
-sudo echo "UUID=$UUID $MOUNTPT ext4 defaults 0 0" >> /etc/fstab
