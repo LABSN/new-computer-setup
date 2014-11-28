@@ -1,14 +1,17 @@
 #! /bin/bash -e
 ## Commands to be run when setting up a fresh system. If you intend to
 ## install Intel MKL, you should do so *BEFORE* running this script, and
-## then set the "mkl" variable to "true" in order to compile against the
-## MKL libraries: 
+## then set the "mkl" variable to "true" in order to allow compiling
+## against the MKL libraries (you can still specify whether to compile
+## against MKL on a case-by-case basis for each individual program).
 mkl=false
-mkl_prefix=/opt/intel
+## If mkl=true, you must also provide the install prefix you used when
+## installing MKL:
+mkl_prefix="/opt/intel"
 
-## This script does *NOT* install MKL, MATLAB or Freesurfer. Information
-## on MATLAB installation for LABS^N members is available on the lab
-## wiki. Freesurfer's website has thorough instructions on installation.
+## This script does *NOT* install MATLAB or Freesurfer. Information on
+## MATLAB installation for LABS^N members is available on the lab wiki.
+## Freesurfer's website has thorough instructions on installation.
 
 ## ## ## ## ## ##
 ##  DECISIONS  ##
@@ -22,7 +25,8 @@ mkl_prefix=/opt/intel
 ## at all, but be aware that many of the early-listed items are
 ## prerequisites for items further down the list.
 
-## Do you want both Python 2.x and Python 3.x versions of everything?
+## Do you want both Python 2.x and Python 3.x versions of the various
+## python-related packages?
 p2k=true
 p3k=true
 
@@ -30,70 +34,36 @@ p3k=true
 build_dir="~/Builds"
 mkdir -p $build_dir
 
-## HDF5 OPTIONS
+## HDF5 (Heirarchical data format for large data sets)
 ## "serial", "openmpi", and "mpich" are all Ubuntu repository options,
 ## the latter two being parallel versions. If opting for parallel, 
 ## "openmpi" is recommended. Compiling from source is also possible, but
 ## not really necessary; you can compile against Intel MKL ("intel"), 
 ## OpenMPI ("source-mpi"), or the default system compilers ("system").
-## TODO: Uses version 1.8.13 (current as of 2014-11-25). If not
-## installing from repos, check for newer version. Make sure to get
-## .tar.gz, not .tar.bz2
+## Currently set to use version 1.8.13 (latest as of 2014-11-25). If not
+## installing from repos, check website for newer version. Make sure to
+## specify the URL for the .tar.gz, not .tar.bz2 version.
 hdf="serial"
-hdf_prefix="/opt"  # a sub-folder "hdf5" will be created here automatically
+hdf_prefix="/opt" # a sub-folder "hdf5" is created here automatically
 hdf_url="http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.13.tar.gz"
 
-## OPEN MPI: Only necessary with HDF5 options "openmpi" or "source-mpi".
+## OPEN MPI (Message passing interface for multi-threaded computing) 
+## Only necessary with HDF5 options "openmpi" or "source-mpi".
 ## Options are "intel" or "system" for the choice of compilers.
-## TODO: Uses version 1.8.3 (current as of 2014-11-25). Check for newer
-## version. Make sure to get .tar.gz and not .tar.bz2. 
+## Currently set to use version 1.8.3 (latest as of 2014-11-25). Check
+## website for newer version before installing. Make sure to specify the
+## URL for the .tar.gz and not .tar.bz2 version.
 mpi="system"
 mpi_prefix="/usr/local"
 mpi_url="http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.3.tar.gz"
 
-## NUMPY & SCIPY OPTIONS: "repo", "pip", "git", & "mkl". mkl implies git
+## NUMPY & SCIPY (de-facto standard for numeric computations and
+## scientific functions in Python). Install options are "repo", "pip",
+## "git", & "mkl". Both "git" and "mkl" mean compiling locally from
+## source; the "git" option uses default system compilers, while "mkl"
+## compiles against the MKL libraries.
 numpy="repo"
 scipy="repo"
-
-## All of the following have the same choices: "repo", "pip", or "git".
-## Note that scikit-learn does not have a separate python3 version in
-## the repos, so the p2k and p3k options do not differ for that package.
-## Also note that some users like to install Spyder from the repos first
-## to get the icon set, menu integration, etc, and then later install
-## from pip or git to get the latest features. If this is you, then set
-## Spyder to "repo" here, then run the pip or git installation lines
-## after this script is completed.
-mpl="repo"    # MATPLOTLIB: best-of-breed scientific plotting in python
-pd="repo"     # PANDAS: Python data analysis library
-skl="repo"    # SCIKIT-LEARN: machine learning algorithms in python
-sea="repo"    # SEABORN: data visualization package built atop matplotlib
-svgu="repo"   # SVG Utils: python tools for combining & manipulating SVGs
-spyder="repo" # SPYDER: Python IDE tailored to scientific users
-
-## The following aren't available in the Ubuntu repos, so the only
-## choices are "pip" or "git".
-skc="pip"   # SCIKITS.CUDA: SciPy toolkit interface to NVIDIA's CUDA libraries
-tdt="none"  # TDTPY:  Python wrappers for TDT's Active-X interface
-
-## IMAGE PROCESSING APPS: inkscape, gimp, & image magick are repo-only,
-## so just need a boolean for whether to install them or not:
-ink=true
-gimp=true
-magick=true
-
-## EXPYFUN DEPENDENCIES
-## All of these have options "repo", "pip", or "git". For Pyglet, "git"
-## is required for expyfun to work (and incidentally, for Pyglet "git"
-## really means using pip to install the latest development tarball from
-## the dev repo, which is a google code site, not GitHub). NumExpr is a
-## dependency of PyTables, but PyTables is no longer a dependency of
-## expyfun (it's been replaced by h5py), so those two default to not
-## being installed at all. If you decide to install them anyway, "mkl"
-## is also an option for numexpr, and implies "git".
-joblib="repo"  # JOBLIB: python parallelization library
-pyglet="pip"   # PYGLET: python audio / visual interface layer
-numexpr="none"
-pytables="none"
 
 ## EXPYFUN and MNEFUN: Both come from GitHub. Options are "user" or
 ## "dev"; choose "dev" if you are likely to modify / contribute to the
@@ -113,22 +83,67 @@ mnefun="user"
 ## that up, that you should run after this script succeeds.
 mnepy="pip"
 
+## NumExpr is a dependency of PyTables, but PyTables is no longer a
+## dependency of expyfun (it's been replaced by h5py), so those two
+## default to not being installed at all. If you decide to install them
+## anyway, options are "repo", "pip", or "git"; "mkl" is also an option
+## for numexpr.
+numexpr="none"
+pytables="none"
+
+## All of the following have the same choices: "repo", "pip", or "git".
+## Note that scikit-learn does not have a separate python3 version in
+## the repos, so the p2k and p3k options do not differ for that package.
+## Also note that some users like to install Spyder from the repos first
+## to get the icon set, menu integration, etc, and then later install
+## from pip or git to get the latest features. If this is you, then set
+## Spyder to "repo" here, then run the pip or git installation lines
+## after this script has been successfully run. For Pyglet, "git" is
+## required for expyfun to work (and incidentally, for Pyglet "git"
+## really means using pip to install the latest development tarball from
+## the dev repo, which is actually a google code site, not GitHub).
+mpl="repo"    # MATPLOTLIB: best-of-breed scientific plotting in python
+pd="repo"     # PANDAS: Python data analysis library
+skl="repo"    # SCIKIT-LEARN: machine learning algorithms in python
+sea="repo"    # SEABORN: data visualization package built atop matplotlib
+svgu="repo"   # SVG Utils: python tools for combining & manipulating SVGs
+spyder="repo" # SPYDER: Python IDE tailored to scientific users
+joblib="repo" # JOBLIB: python parallelization library
+pyglet="git"  # PYGLET: python audio / visual interface layer
+
+## The following aren't available in the Ubuntu repos, so the only
+## choices are "pip" or "git".
+skc="pip"   # SCIKITS.CUDA: SciPy toolkit interface to Nvidia's CUDA libraries
+tdt="none"  # TDTPY:  Python wrappers for TDT's Active-X interface
+
 ## R and JULIA: Statistical programming environments. Options for R are
 ## "repo" and "cran", with "cran" being recommended (runs through
-## apt-get, but adds a new source to /etc/apt/sources.list). The 
-## recommended IDE for R is RStudio, which currently serves up binaries
-## from its own website rather than through the repos, so you need to
-## provide the URL for the most current version here.  Options for Julia
-## are "ppa", "git", and "mkl". mkl implies git. The PPA is run by a
-## former LABS^N member, and so is not really a risk/unknown like some
-## PPAs are. If you install the JuliaStudio IDE, make sure to update the
-## URL and make sure it is compatible with the version of Julia you are
-## installing. 
+## apt-get, but adds a new source to /etc/apt/sources.list; similar to a
+## PPA but more trustworthy as the source is an offical CRAN mirror).
+## The recommended IDE for R is RStudio, which currently serves up
+## binaries from its own website rather than through the repos, so you
+## need to provide the URL for the most current version here. Options
+## for Julia are "ppa", "git", and "mkl". The PPA is run by a former
+## LABS^N member, and so is not really a risk/unknown like some PPAs
+## are. There is currently no mature IDE for Julia. JuliaStudio for
+## Linux is not compatible with the most recent version of Julia. There
+## is a Julia plugin for the LightTable editor called Juno, that might
+## be worth trying...
 rlang="cran"
+rstudio=false
 rstudio_url="http://download1.rstudio.org/rstudio-0.98.1091-amd64.deb"
 julia="ppa"
+#juliastudio=false
 #juliastudio_url="https://s3.amazonaws.com/cdn-common.forio.com/\
 #julia-studio/0.4.4/julia-studio-linux-64-0.4.4.tar.gz"
+
+## IMAGE PROCESSING APPS: inkscape, gimp, & image magick are useful for
+## figure creation and image processing. Bleeding-edge versions are not
+## offered here, since our image processing needs are fairly minimal.
+## Hence, just need a boolean for whether to install them or not. 
+ink=true
+gimp=true
+magick=true
 
 ## ## ## ## ## ## ##
 ## GENERAL SETUP  ##
@@ -239,7 +254,7 @@ elif [ $numpy = "git" ] || [ $numpy = "mkl" ]; then
 	git clone git@github.com:numpy/numpy.git
 	cd numpy
 	rm -Rf build  ## in case rebuilding
-	if [ $numpy = "mkl" ]; then
+	if [ $mkl = true ] && [ $numpy = "mkl" ]; then
 		## generate site.cfg
 		echo [mkl] > site.cfg
 		echo library_dirs = "$mkl_prefix/mkl/lib/intel64" >> site.cfg
@@ -283,7 +298,7 @@ elif [ $numexpr = "git" ] || [ $numexpr = "mkl" ]; then
 	git clone git@github.com:pydata/numexpr.git
 	cd numexpr
 	rm -Rf build  ## in case rebuilding
-	if [ $numexpr = "mkl" ]; then
+	if [ $mkl = true ] && [ $numexpr = "mkl" ]; then
 		## generate site.cfg (same format as NumPy)
 		echo [mkl] > site.cfg
 		echo library_dirs = "$mkl_prefix/mkl/lib/intel64" >> site.cfg
@@ -366,7 +381,7 @@ elif [ $scipy = "git" ] || [ $scipy = "mkl" ]; then
 	git clone git@github.com:scipy/scipy.git
 	cd scipy
 	rm -Rf build  ## in case rebuilding
-	if [ $scipy = "mkl" ]; then
+	if [ $mkl = true ] && [ $scipy = "mkl" ]; then
 		flags="config --compiler=intelem --fcompiler=intelem \
 		build_clib --compiler=intelem --fcompiler=intelem build_ext \
 		--compiler=intelem --fcompiler=intelem"
@@ -770,6 +785,18 @@ elif [ $mnepy = "git" ]; then
 	fi
 fi
 
+## ## ##
+## R  ##
+## ## ##
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+codename=$(lsb_release -c -s)
+sudo echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" >> \
+/etc/apt/sources.list
+sudo apt-get update
+sudo apt-get install r-base r-base-dev
+Rscript -e "install.packages(c('tidyr', 'devtools', 'ez', 'ggplot2', \
+'Hmisc', 'lme4', 'plyr', 'reshape', 'stringi', 'zoo'))"
+
 ## ## ## ##
 ## JULIA ##
 ## ## ## ##
@@ -786,7 +813,7 @@ elif [ $julia = "git" ] || [ $julia = "mkl" ]; then
 	cd "$build_dir"
 	git clone git@github.com:JuliaLang/julia.git
 	cd julia
-	if [ $julia = "mkl" ]; then
+	if [ $mkl = true ] && [ $julia = "mkl" ]; then
 		source "$mkl_prefix/mkl/bin/mklvars.sh" intel64 ilp64
 		export MKL_INTERFACE_LAYER=ILP64
 		echo USE_MKL = 1 >> Make.user
@@ -796,15 +823,28 @@ elif [ $julia = "git" ] || [ $julia = "mkl" ]; then
 	echo export PATH="$(pwd):$PATH" >> ~/.bashrc
 fi
 
-## ## ##
-## R  ##
-## ## ##
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
-codename=$(lsb_release -c -s)
-sudo echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" >> \
-/etc/apt/sources.list
-sudo apt-get update
-sudo apt-get install r-base r-base-dev
-Rscript -e "install.packages(c('tidyr', 'devtools', 'ez', 'ggplot2', \
-'Hmisc', 'lme4', 'plyr', 'reshape', 'stringi', 'zoo'))"
+## ## ## ## ##
+## R STUDIO ##
+## ## ## ## ##
+if [ $rstudio = true ]; then
+	rstudio_deb="${rstudio_url##*/}"
+	cd
+	wget "$rstudio_url"
+	sudo dpkg -i "$rstudio_deb"
+	rm "$rstudio_deb"
+fi
 
+## ## ## ## ## ## ##
+##  JULIA STUDIO  ##
+## ## ## ## ## ## ##
+#if [ $juliastudio = true ]; then
+#	juliastudio_archive="${juliastudio_url##*/}"
+#	juliastudio_folder="${juliastudio_archive%.tar.gz}"
+#	cd
+#	wget "$juliastudio_url"
+#	tar -zxf "$juliastudio_archive"
+#	cd "$juliastudio_folder"
+#	## TODO: do the installation
+#	rm "~/$juliastudio_archive"
+#	rm -Rf "~/$juliastudio_folder"
+#fi
