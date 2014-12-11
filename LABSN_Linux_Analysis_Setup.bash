@@ -65,6 +65,13 @@ mpi_url="http://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.3.tar.
 numpy="repo"
 scipy="repo"
 
+## GITHUB SSH KEY AUTHORIZATION: Ensure that your computer's SSH key is
+## tracked in github so you are allowed to access the lab git repositories.
+## To do this, copy your computer's SSH public key into your github account
+## under Github > Settings > SSH keys.  For more detailed instructions,
+## go to <https://help.github.com/articles/generating-ssh-keys/> or 
+## google "github help generate ssh key."
+
 ## EXPYFUN and MNEFUN: Both come from GitHub. Options are "user" or
 ## "dev"; choose "dev" if you are likely to modify / contribute to the
 ## codebase, in addition to using it to run your experiments / analysis.
@@ -726,13 +733,13 @@ fi
 ## ## ## ## ##
 cd "$build_dir"
 if [ $expyfun = "user" ]; then
-	git clone https://github.com/LABSN/expyfun.git
+	git clone git@github.com:LABSN/expyfun.git
 	cd expyfun
 	directive="install"
 elif [ $expyfun = "dev" ]; then
-	git clone https://github.com/$github_username/expyfun.git
+	git clone git@github.com:$github_username/expyfun.git
 	cd expyfun
-	git remote add upstream https://github.com/LABSN/expyfun.git
+	git remote add upstream git@github.com:LABSN/expyfun.git
 	directive="develop"
 fi
 if [ $p2k = true ]; then
@@ -747,13 +754,13 @@ fi
 ## ## ## ## ##
 cd "$build_dir"
 if [ $mnefun = "user" ]; then
-	git clone https://github.com/LABSN/mnefun.git
+	git clone git@github.com:LABSN/mnefun.git
 	cd mnefun
 	directive="install"
 elif [ $mnefun = "dev" ]; then
-	git clone https://github.com/$github_username/mnefun
+	git clone git@github.com:$github_username/mnefun.git
 	cd mnefun
-	git remote add upstream https://github.com/LABSN/mnefun.git
+	git remote add upstream git@github.com:LABSN/mnefun.git
 	directive="develop"
 fi
 if [ $p2k = true ]; then
