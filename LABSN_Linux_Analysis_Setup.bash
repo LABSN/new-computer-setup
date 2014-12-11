@@ -251,7 +251,7 @@ elif [ $numpy = "pip" ]; then
 	fi
 elif [ $numpy = "git" ] || [ $numpy = "mkl" ]; then
 	cd "$build_dir"
-	git clone git@github.com:numpy/numpy.git
+	git clone https://github.com/numpy/numpy.git
 	cd numpy
 	rm -Rf build  ## in case rebuilding
 	if [ $mkl = true ] && [ $numpy = "mkl" ]; then
@@ -295,7 +295,7 @@ elif [ $numexpr = "pip" ]; then
 	fi
 elif [ $numexpr = "git" ] || [ $numexpr = "mkl" ]; then
 	cd "$build_dir"
-	git clone git@github.com:pydata/numexpr.git
+	git clone https://github.com/pydata/numexpr.git
 	cd numexpr
 	rm -Rf build  ## in case rebuilding
 	if [ $mkl = true ] && [ $numexpr = "mkl" ]; then
@@ -340,7 +340,7 @@ elif [ $pytables = "pip" ]; then
 	fi
 elif [ $pytables = "git" ]; then
 	cd "$build_dir"
-	git clone git@github.com:PyTables/PyTables.git
+	git clone https://github.com/PyTables/PyTables.git
 	cd PyTables
 	if [ $p2k = true ]; then
 		make clean
@@ -378,7 +378,7 @@ elif [ $scipy = "pip" ]; then
 	fi
 elif [ $scipy = "git" ] || [ $scipy = "mkl" ]; then
 	cd "$build_dir"
-	git clone git@github.com:scipy/scipy.git
+	git clone https://github.com/scipy/scipy.git
 	cd scipy
 	rm -Rf build  ## in case rebuilding
 	if [ $mkl = true ] && [ $scipy = "mkl" ]; then
@@ -417,7 +417,7 @@ elif [ $mpl = "pip" ]; then
 	fi
 elif [ $mpl = "git" ]; then
 	cd "$build_dir"
-	git clone git@github.com:matplotlib/matplotlib.git
+	git clone https://github.com/matplotlib/matplotlib.git
 	cd matplotlib
 	if [ $p2k = true ]; then
 		rm -Rf build
@@ -448,7 +448,7 @@ elif [ $pd = "pip" ]; then
 	fi
 elif [ $pd = "git" ]; then
 	cd "$build_dir"
-	git clone git@github.com:pydata/pandas.git
+	git clone https://github.com/pydata/pandas.git
 	cd pandas
 	if [ $p2k = true ]; then
 		rm -Rf build
@@ -480,7 +480,7 @@ elif [ $skl = "pip" ]; then
 	fi
 elif [ $skl = "git" ]; then
 	cd "$build_dir"
-	git clone git@github.com:scikit-learn/scikit-learn.git
+	git clone https://github.com/scikit-learn/scikit-learn.git
 	cd scikit-learn
 	if [ $p2k = true ]; then
 		rm -Rf build
@@ -514,9 +514,9 @@ elif [ $sea = "pip" ]; then
 	fi
 elif [ $sea = "git" ]; then
 	cd "$build_dir"
-	git clone git@github.com:pydata/patsy.git
-	git clone git@github.com:statsmodels/statsmodels.git
-	git clone git@github.com:mwaskom/seaborn.git
+	git clone https://github.com/pydata/patsy.git
+	git clone https://github.com/statsmodels/statsmodels.git
+	git clone https://github.com/mwaskom/seaborn.git
 	for name in patsy statsmodels seaborn; do
 		cd "$build_dir/$name"
 		if [ $p2k = true ]; then
@@ -542,7 +542,7 @@ if [ $skc = "pip" ]; then
 	fi
 elif [ $skc = "git" ]; then
 	cd "$build_dir"
-	git clone git@github.com:lebedov/scikits.cuda.git
+	git clone https://github.com/lebedov/scikits.cuda.git
 	cd scikits.cuda
 	if [ $p2k = true ]; then
 		rm -Rf build
@@ -599,11 +599,11 @@ elif [ $svgu = "pip" ]; then
 	fi
 elif [ $svgu = "git" ]; then
 	cd "$build_dir"
-	git clone git@github.com:SimonSapin/tinycss.git
-	git clone git@github.com:SimonSapin/cssselect.git
-	git clone git@github.com:SimonSapin/cairocffi.git
-	git clone git@github.com:Kozea/CairoSVG.git
-	git clone git@github.com:btel/svg_utils.git
+	git clone https://github.com/SimonSapin/tinycss.git
+	git clone https://github.com/SimonSapin/cssselect.git
+	git clone https://github.com/SimonSapin/cairocffi.git
+	git clone https://github.com/Kozea/CairoSVG.git
+	git clone https://github.com/btel/svg_utils.git
 	for name in tinycss cssseleect cairocffi CairoSVG svg_utils; do
 		cd "$build_dir/$name"
 		if [ $p2k = true ]; then
@@ -687,7 +687,7 @@ elif [ $joblib = "pip" ]; then
 	fi
 elif [ $joblib = "git" ]; then
 	cd "$build_dir"
-	git clone git@github.com:joblib/joblib.git
+	git clone https://github.com/joblib/joblib.git
 	cd joblib
 	if [ $p2k = true ]; then
 		rm -Rf build
@@ -726,13 +726,13 @@ fi
 ## ## ## ## ##
 cd "$build_dir"
 if [ $expyfun = "user" ]; then
-	git clone git@github.com/LABSN/expyfun.git
+	git clone https://github.com/LABSN/expyfun.git
 	cd expyfun
 	directive="install"
 elif [ $expyfun = "dev" ]; then
-	git clone git@github.com:$github_username/expyfun.git
+	git clone https://github.com/$github_username/expyfun.git
 	cd expyfun
-	git remote add upstream git@github.com:LABSN/expyfun.git
+	git remote add upstream https://github.com/LABSN/expyfun.git
 	directive="develop"
 fi
 if [ $p2k = true ]; then
@@ -747,13 +747,13 @@ fi
 ## ## ## ## ##
 cd "$build_dir"
 if [ $mnefun = "user" ]; then
-	git clone git@github.com:LABSN/mnefun.git
+	git clone https://github.com/LABSN/mnefun.git
 	cd mnefun
 	directive="install"
 elif [ $mnefun = "dev" ]; then
-	git clone git@github.com:$github_username/MNE.git
+	git clone https://github.com/$github_username/MNE.git
 	cd expyfun
-	git remote add upstream git@github.com:LABSN/mnefun.git
+	git remote add upstream https://github.com/LABSN/mnefun.git
 	directive="develop"
 fi
 if [ $p2k = true ]; then
@@ -775,7 +775,7 @@ if [ $mnepy = "pip" ]; then
 	fi
 elif [ $mnepy = "git" ]; then
 	cd "$build_dir"
-	git clone git@github.com:mne-tools/mne-python.git
+	git clone https://github.com/mne-tools/mne-python.git
 	cd mne-python
 	if [ $p2k = true ]; then
 		python2 setup.py install --user
@@ -811,7 +811,7 @@ if [ $julia = "ppa" ]; then
 	sudo apt-get install julia
 elif [ $julia = "git" ] || [ $julia = "mkl" ]; then
 	cd "$build_dir"
-	git clone git@github.com:JuliaLang/julia.git
+	git clone https://github.com/JuliaLang/julia.git
 	cd julia
 	if [ $mkl = true ] && [ $julia = "mkl" ]; then
 		source "$mkl_prefix/mkl/bin/mklvars.sh" intel64 ilp64
