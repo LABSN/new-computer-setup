@@ -31,7 +31,7 @@ p2k=true
 p3k=true
 
 ## Create a directory to house any custom builds. Rename if desired.
-build_dir="~/Builds"
+build_dir="$HOME/Builds"
 mkdir -p $build_dir
 
 ## HDF5 (Heirarchical data format for large data sets)
