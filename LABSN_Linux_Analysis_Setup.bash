@@ -90,13 +90,20 @@ mnefun="user"
 ## that up, that you should run after this script succeeds.
 mnepy="pip"
 
-## NumExpr is a dependency of PyTables, but PyTables is no longer a
-## dependency of expyfun (it's been replaced by h5py), so those two
-## default to not being installed at all. If you decide to install them
-## anyway, options are "repo", "pip", or "git"; "mkl" is also an option
-## for numexpr.
+## PYEPARSE: analysis of eye-tracking and pupillometry data. Its
+## dependencies are NumExpr and PyTables. Pyeparse is a quasi-dependency
+## of expyfun (since it is required by the pupillometry codeblocks), but
+## is not otherwise required for expyfun installation or normal
+## functioning. If you might be doing eye tracking / pupillometry,
+## install all of these. Options for numexpr are "repo", "pip", "git",
+## or "mkl"; options for pytables are "repo", "pip", or "git"; the only
+## option for pyeparse is "git". Pandas is a soft requirement of
+## pyeparse (it speeds up I/O), but is also general-purpose python data
+## analysis library; options are "repo", "pip", "git".
 numexpr="none"
 pytables="none"
+pyeparse="none"
+pandas="repo"
 
 ## All of the following have the same choices: "repo", "pip", or "git".
 ## Note that scikit-learn does not have a separate python3 version in
@@ -110,7 +117,6 @@ pytables="none"
 ## really means using pip to install the latest development tarball from
 ## the dev repo, which is actually a google code site, not GitHub).
 mpl="repo"    # MATPLOTLIB: best-of-breed scientific plotting in python
-pd="repo"     # PANDAS: Python data analysis library
 skl="repo"    # SCIKIT-LEARN: machine learning algorithms in python
 sea="repo"    # SEABORN: data visualization package built atop matplotlib
 svgu="repo"   # SVG Utils: python tools for combining & manipulating SVGs
@@ -439,24 +445,41 @@ fi
 ## ## ## ## ##
 ##  PANDAS  ##
 ## ## ## ## ##
-if [ $pd = "repo" ]; then
+if [ $pandas = "repo" ]; then
     if [ $p2k = true ]; then
         sudo apt-get install python-pandas python-pandas-lib
     fi
     if [ $p3k = true ]; then
         sudo apt-get install python3-pandas python3-pandas-lib
     fi
-elif [ $pd = "pip" ]; then
+elif [ $pandas = "pip" ]; then
     if [ $p2k = true ]; then
         pip install --user pandas
     fi
     if [ $p3k = true ]; then
         pip3 install --user pandas
     fi
-elif [ $pd = "git" ]; then
+elif [ $pandas = "git" ]; then
     cd "$build_dir"
     git clone git://github.com/pydata/pandas.git
     cd pandas
+    if [ $p2k = true ]; then
+        rm -Rf build
+        python2 setup.py install --user
+    fi
+    if [ $p3k = true ]; then
+        rm -Rf build
+        python3 setup.py install --user
+    fi
+fi
+
+## ## ## ## ##
+## PYEPARSE ##
+## ## ## ## ##
+if [ $pyeparse = "git" ]; then
+    cd "$build_dir"
+    git clone git://github.com/pyeparse/pyeparse.git
+    cd pyeparse
     if [ $p2k = true ]; then
         rm -Rf build
         python2 setup.py install --user
