@@ -36,9 +36,9 @@ mkdir -p $build_dir
 
 ## HDF5 (Heirarchical data format for large data sets)
 ## "serial", "openmpi", and "mpich" are all Ubuntu repository options,
-## the latter two being parallel versions. If opting for parallel, 
+## the latter two being parallel versions. If opting for parallel,
 ## "openmpi" is recommended. Compiling from source is also possible, but
-## not really necessary; you can compile against Intel MKL ("intel"), 
+## not really necessary; you can compile against Intel MKL ("intel"),
 ## OpenMPI ("source-mpi"), or the default system compilers ("system").
 ## Currently set to use version 1.8.13 (latest as of 2014-11-25). If not
 ## installing from repos, check website for newer version. Make sure to
@@ -47,7 +47,7 @@ hdf="serial"
 hdf_prefix="/opt" # a sub-folder "hdf5" is created here automatically
 hdf_url="http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.13.tar.gz"
 
-## OPEN MPI (Message passing interface for multi-threaded computing) 
+## OPEN MPI (Message passing interface for multi-threaded computing)
 ## Only necessary with HDF5 options "openmpi" or "source-mpi".
 ## Options are "intel" or "system" for the choice of compilers.
 ## Currently set to use version 1.8.3 (latest as of 2014-11-25). Check
@@ -69,7 +69,7 @@ scipy="repo"
 ## tracked in github so you are allowed to access the lab git repositories.
 ## To do this, copy your computer's SSH public key into your github account
 ## under Github > Settings > SSH keys.  For more detailed instructions,
-## go to <https://help.github.com/articles/generating-ssh-keys/> or 
+## go to <https://help.github.com/articles/generating-ssh-keys/> or
 ## google "github help generate ssh key."
 
 ## EXPYFUN and MNEFUN: Both come from GitHub. Options are "user" or
@@ -78,7 +78,7 @@ scipy="repo"
 ## If you choose "dev", then you should first fork the project from the
 ## LABSN GitHub account into your own account, and enter your GitHub
 ## username below. The script will set up your local clone to track your
-## fork as "origin", and will create a second remote "upstream" that 
+## fork as "origin", and will create a second remote "upstream" that
 ## tracks the LABSN master.
 github_username=""
 expyfun="user"
@@ -147,7 +147,7 @@ julia="ppa"
 ## IMAGE PROCESSING APPS: inkscape, gimp, & image magick are useful for
 ## figure creation and image processing. Bleeding-edge versions are not
 ## offered here, since our image processing needs are fairly minimal.
-## Hence, just need a boolean for whether to install them or not. 
+## Hence, just need a boolean for whether to install them or not.
 ink=true
 gimp=true
 magick=true
@@ -164,12 +164,12 @@ sudo apt-get install default-jre build-essential git-core cmake bzip2 \
 liblzo2-2 liblzo2-dev zlib1g zlib1g-dev libfreetype6-dev libpng-dev \
 libxml2-dev libxslt1-dev
 if [ $p2k = true ]; then
-	sudo apt-get install cython python-nose python-coverage \
-	python-setuptools python-pip
+    sudo apt-get install cython python-nose python-coverage \
+    python-setuptools python-pip
 fi
 if [ $p3k = true ]; then
-	sudo apt-get install cython3 python3-nose python3-coverage \
-	python3-setuptools python3-pip
+    sudo apt-get install cython3 python3-nose python3-coverage \
+    python3-setuptools python3-pip
 fi
 # pip install --user Cython nose coverage setuptools
 # pip3 install --user Cython nose coverage setuptools
@@ -178,25 +178,25 @@ fi
 ## OPEN MPI ##
 ## ## ## ## ##
 if [ $hdf = "openmpi" ] || [ $hdf = "source-mpi" ]; then
-	mpi_archive="${mpi_url##*/}"
-	mpi_folder="${mpi_archive%.tar.gz}"
-	cd
-	wget "$mpi_url"
-	tar -zxf "$mpi_archive"
-	cd "$mpi_folder"
-	if [ "$mpi" = "intel" ]; then
-		flags="CC=icc CXX=icpc FC=ifort"
-	fi
-	./configure --prefix="$mpi_prefix" $flags
-	make -j 6 all
-	sudo bash
-	make install
-	## NOTE: the "sudo bash; make install" lines are equivalent to
-	## "sudo make install", except this way the ~/.bashrc file gets
-	## loaded first (which is not normally the case with sudo commands).
-	## That way, the intel compiler dirs are on the path during install.
-	rm "~/$mpi_archive"
-	rm -Rf "~/$mpi_folder"
+    mpi_archive="${mpi_url##*/}"
+    mpi_folder="${mpi_archive%.tar.gz}"
+    cd
+    wget "$mpi_url"
+    tar -zxf "$mpi_archive"
+    cd "$mpi_folder"
+    if [ "$mpi" = "intel" ]; then
+        flags="CC=icc CXX=icpc FC=ifort"
+    fi
+    ./configure --prefix="$mpi_prefix" $flags
+    make -j 6 all
+    sudo bash
+    make install
+    ## NOTE: the "sudo bash; make install" lines are equivalent to
+    ## "sudo make install", except this way the ~/.bashrc file gets
+    ## loaded first (which is not normally the case with sudo commands).
+    ## That way, the intel compiler dirs are on the path during install.
+    rm "~/$mpi_archive"
+    rm -Rf "~/$mpi_folder"
 fi
 
 ## ## ## ##
@@ -204,528 +204,528 @@ fi
 ## ## ## ##
 if [ $hdf = "source-mpi" ] || [ $hdf = "intel" ] || [ $hdf = "system" ]
 then
-	hdf_archive=${hdf_url##*/}
-	hdf_folder=${hdf_archive%.tar.gz}
-	cd "$hdf_prefix"
-	mkdir "hdf5"
-	cd
-	wget "$hdf_url"
-	tar -zxf "$hdf_archive"
-	cd "$hdf_folder"
-	if [ $hdf = "source-mpi" ]; then
-		export CC=mpicc
-		flags="--disable-static"
-	else  # $hdf = "intel" or "system"
-		if [ $hdf = "intel" ]; then
-			export CC=icc
-			export F9X=ifort
-			export CXX=icpc
-		fi
-		flags="--enable-fortran --enable-cxx --disable-static"
-	fi
-	./configure --prefix="$hdf_prefix/hdf5" $flags
-	make -j -l6
-	make check
-	make install
-	make check-install
-	cd 
-	rm "~/$hdf_archive"
-	rm -Rf "~/$hdf_folder"
+    hdf_archive=${hdf_url##*/}
+    hdf_folder=${hdf_archive%.tar.gz}
+    cd "$hdf_prefix"
+    mkdir "hdf5"
+    cd
+    wget "$hdf_url"
+    tar -zxf "$hdf_archive"
+    cd "$hdf_folder"
+    if [ $hdf = "source-mpi" ]; then
+        export CC=mpicc
+        flags="--disable-static"
+    else  # $hdf = "intel" or "system"
+        if [ $hdf = "intel" ]; then
+            export CC=icc
+            export F9X=ifort
+            export CXX=icpc
+        fi
+        flags="--enable-fortran --enable-cxx --disable-static"
+    fi
+    ./configure --prefix="$hdf_prefix/hdf5" $flags
+    make -j -l6
+    make check
+    make install
+    make check-install
+    cd
+    rm "~/$hdf_archive"
+    rm -Rf "~/$hdf_folder"
 elif [ $hdf = "mpich" ]; then
-	sudo apt-get install libhdf5-mpich2-7 libhdf5-mpich2-dev
+    sudo apt-get install libhdf5-mpich2-7 libhdf5-mpich2-dev
 elif [ $hdf = "openmpi" ]; then
-	sudo apt-get install libhdf5-openmpi-7 libhdf5-openmpi-dev
+    sudo apt-get install libhdf5-openmpi-7 libhdf5-openmpi-dev
 elif [ $hdf = "serial" ]; then
-	sudo apt-get install libhdf5-7 libhdf5-dev
+    sudo apt-get install libhdf5-7 libhdf5-dev
 fi
 
 ## ## ## ##
 ## NUMPY ##
 ## ## ## ##
 if [ $numpy = "repo" ]; then
-	if [ $p2k = true ]; then
-		sudo apt-get install python-numpy
-	fi
-	if [ $p3k = true ]; then
-		sudo apt-get install python3-numpy
-	fi
+    if [ $p2k = true ]; then
+        sudo apt-get install python-numpy
+    fi
+    if [ $p3k = true ]; then
+        sudo apt-get install python3-numpy
+    fi
 elif [ $numpy = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user numpy
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user numpy
-	fi
+    if [ $p2k = true ]; then
+        pip install --user numpy
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user numpy
+    fi
 elif [ $numpy = "git" ] || [ $numpy = "mkl" ]; then
-	cd "$build_dir"
-	git clone git://github.com/numpy/numpy.git
-	cd numpy
-	rm -Rf build  ## in case rebuilding
-	if [ $mkl = true ] && [ $numpy = "mkl" ]; then
-		## generate site.cfg
-		echo [mkl] > site.cfg
-		echo library_dirs = "$mkl_prefix/mkl/lib/intel64" >> site.cfg
-		echo include_dirs = "$mkl_prefix/mkl/include" >> site.cfg
-		echo mkl_libs = mkl_rt >> site.cfg
-		echo lapack_libs =   >> site.cfg
-		flags="config --compiler=intelem build_clib --compiler=intelem \
-		build_ext --compiler=intelem"
-	else  # $numpy = "git"
-		flags=""
-	fi
-	if [ $p2k = true ]; then
-		python2 setup.py clean
-		python2 setup.py $flags install --user
-	fi
-	if [ $p3k = true ]; then
-		python3 setup.py clean
-		python3 setup.py $flags install --user
-	fi
+    cd "$build_dir"
+    git clone git://github.com/numpy/numpy.git
+    cd numpy
+    rm -Rf build  ## in case rebuilding
+    if [ $mkl = true ] && [ $numpy = "mkl" ]; then
+        ## generate site.cfg
+        echo [mkl] > site.cfg
+        echo library_dirs = "$mkl_prefix/mkl/lib/intel64" >> site.cfg
+        echo include_dirs = "$mkl_prefix/mkl/include" >> site.cfg
+        echo mkl_libs = mkl_rt >> site.cfg
+        echo lapack_libs =   >> site.cfg
+        flags="config --compiler=intelem build_clib --compiler=intelem \
+        build_ext --compiler=intelem"
+    else  # $numpy = "git"
+        flags=""
+    fi
+    if [ $p2k = true ]; then
+        python2 setup.py clean
+        python2 setup.py $flags install --user
+    fi
+    if [ $p3k = true ]; then
+        python3 setup.py clean
+        python3 setup.py $flags install --user
+    fi
 fi
 
 ## ## ## ## ##
 ## NUMEXPR  ##
 ## ## ## ## ##
 if [ $numexpr = "repo" ]; then
-	if [ $p2k = true ]; then
-		sudo apt-get install python-numexpr
-	fi
-	if [ $p3k = true ]; then
-		sudo apt-get install python3-numexpr
-	fi
+    if [ $p2k = true ]; then
+        sudo apt-get install python-numexpr
+    fi
+    if [ $p3k = true ]; then
+        sudo apt-get install python3-numexpr
+    fi
 elif [ $numexpr = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user numexpr
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user numexpr
-	fi
+    if [ $p2k = true ]; then
+        pip install --user numexpr
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user numexpr
+    fi
 elif [ $numexpr = "git" ] || [ $numexpr = "mkl" ]; then
-	cd "$build_dir"
-	git clone git://github.com/pydata/numexpr.git
-	cd numexpr
-	rm -Rf build  ## in case rebuilding
-	if [ $mkl = true ] && [ $numexpr = "mkl" ]; then
-		## generate site.cfg (same format as NumPy)
-		echo [mkl] > site.cfg
-		echo library_dirs = "$mkl_prefix/mkl/lib/intel64" >> site.cfg
-		echo include_dirs = "$mkl_prefix/mkl/include" >> site.cfg
-		echo mkl_libs = mkl_rt >> site.cfg
-		echo lapack_libs =   >> site.cfg
-	fi
-	if [ $p2k = true ]; then
-		python2 setup.py build
-		python2 setup.py install --user
-		#cd; python2 -c "import numexpr; numexpr.test()"
-		#cd "$build_dir/numexpr"
-	fi
-	if [ $p3k = true ]; then
-		python3 setup.py build
-		python3 setup.py install --user
-		#cd; python3 -c "import numexpr; numexpr.test()"
-	fi
-	## NOTE: numexpr.test() fails if run within $build_dir/numexpr,
-	## hence the cd to $HOME first
+    cd "$build_dir"
+    git clone git://github.com/pydata/numexpr.git
+    cd numexpr
+    rm -Rf build  ## in case rebuilding
+    if [ $mkl = true ] && [ $numexpr = "mkl" ]; then
+        ## generate site.cfg (same format as NumPy)
+        echo [mkl] > site.cfg
+        echo library_dirs = "$mkl_prefix/mkl/lib/intel64" >> site.cfg
+        echo include_dirs = "$mkl_prefix/mkl/include" >> site.cfg
+        echo mkl_libs = mkl_rt >> site.cfg
+        echo lapack_libs =   >> site.cfg
+    fi
+    if [ $p2k = true ]; then
+        python2 setup.py build
+        python2 setup.py install --user
+        #cd; python2 -c "import numexpr; numexpr.test()"
+        #cd "$build_dir/numexpr"
+    fi
+    if [ $p3k = true ]; then
+        python3 setup.py build
+        python3 setup.py install --user
+        #cd; python3 -c "import numexpr; numexpr.test()"
+    fi
+    ## NOTE: numexpr.test() fails if run within $build_dir/numexpr,
+    ## hence the cd to $HOME first
 fi
 
 ## ## ## ## ##
 ## PYTABLES ##
 ## ## ## ## ##
 if [ $pytables = "repo" ]; then
-	if [ $p2k = true ]; then
-		sudo apt-get install python-tables python-tables-lib
-	fi
-	if [ $p3k = true ]; then
-		sudo apt-get install python3-tables python3-tables-lib
-	fi
+    if [ $p2k = true ]; then
+        sudo apt-get install python-tables python-tables-lib
+    fi
+    if [ $p3k = true ]; then
+        sudo apt-get install python3-tables python3-tables-lib
+    fi
 elif [ $pytables = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user tables
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user tables
-	fi
+    if [ $p2k = true ]; then
+        pip install --user tables
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user tables
+    fi
 elif [ $pytables = "git" ]; then
-	cd "$build_dir"
-	git clone git://github.com/PyTables/PyTables.git
-	cd PyTables
-	if [ $p2k = true ]; then
-		make clean
-		python2 setup.py build_ext --inplace
-		python2 setup.py install --user
-		#cd; python2 -c "import tables; tables.test()"
-		#cd "$build_dir"/PyTables
-	fi
-	if [ $p3k = true ]; then
-		make clean
-		python3 setup.py build_ext --inplace
-		python3 setup.py install --user
-		#cd; python3 -c "import tables; tables.test()"
-	fi
-	## NOTE: tables.test() fails if run within $build_dir/PyTables,
-	## hence the cd to $HOME first
+    cd "$build_dir"
+    git clone git://github.com/PyTables/PyTables.git
+    cd PyTables
+    if [ $p2k = true ]; then
+        make clean
+        python2 setup.py build_ext --inplace
+        python2 setup.py install --user
+        #cd; python2 -c "import tables; tables.test()"
+        #cd "$build_dir"/PyTables
+    fi
+    if [ $p3k = true ]; then
+        make clean
+        python3 setup.py build_ext --inplace
+        python3 setup.py install --user
+        #cd; python3 -c "import tables; tables.test()"
+    fi
+    ## NOTE: tables.test() fails if run within $build_dir/PyTables,
+    ## hence the cd to $HOME first
 fi
 
 ## ## ## ##
 ## SCIPY ##
 ## ## ## ##
 if [ $scipy = "repo" ]; then
-	if [ $p2k = true ]; then
-		sudo apt-get install python-scipy
-	fi
-	if [ $p3k = true ]; then
-		sudo apt-get install python3-scipy
-	fi
+    if [ $p2k = true ]; then
+        sudo apt-get install python-scipy
+    fi
+    if [ $p3k = true ]; then
+        sudo apt-get install python3-scipy
+    fi
 elif [ $scipy = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user scipy
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user scipy
-	fi
+    if [ $p2k = true ]; then
+        pip install --user scipy
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user scipy
+    fi
 elif [ $scipy = "git" ] || [ $scipy = "mkl" ]; then
-	cd "$build_dir"
-	git clone git://github.com/scipy/scipy.git
-	cd scipy
-	rm -Rf build  ## in case rebuilding
-	if [ $mkl = true ] && [ $scipy = "mkl" ]; then
-		flags="config --compiler=intelem --fcompiler=intelem \
-		build_clib --compiler=intelem --fcompiler=intelem build_ext \
-		--compiler=intelem --fcompiler=intelem"
-	else  # $scipy = "git"
-		flags=""
-	fi
-	if [ $p2k = true ]; then
-		python2 setup.py clean
-		python2 setup.py $flags install --user
-	fi
-	if [ $p3k = true ]; then
-		python3 setup.py clean
-		python3 setup.py $flags install --user
-	fi
+    cd "$build_dir"
+    git clone git://github.com/scipy/scipy.git
+    cd scipy
+    rm -Rf build  ## in case rebuilding
+    if [ $mkl = true ] && [ $scipy = "mkl" ]; then
+        flags="config --compiler=intelem --fcompiler=intelem \
+        build_clib --compiler=intelem --fcompiler=intelem build_ext \
+        --compiler=intelem --fcompiler=intelem"
+    else  # $scipy = "git"
+        flags=""
+    fi
+    if [ $p2k = true ]; then
+        python2 setup.py clean
+        python2 setup.py $flags install --user
+    fi
+    if [ $p3k = true ]; then
+        python3 setup.py clean
+        python3 setup.py $flags install --user
+    fi
 fi
 
 ## ## ## ## ## ##
 ## MATPLOTLIB  ##
 ## ## ## ## ## ##
 if [ $mpl = "repo" ]; then
-	if [ $p2k = true ]; then
-		sudo apt-get install python-matplotlib 
-	fi
-	if [ $p3k = true ]; then
-		sudo apt-get install python3-matplotlib
-	fi
+    if [ $p2k = true ]; then
+        sudo apt-get install python-matplotlib
+    fi
+    if [ $p3k = true ]; then
+        sudo apt-get install python3-matplotlib
+    fi
 elif [ $mpl = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user matplotlib
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user matplotlib
-	fi
+    if [ $p2k = true ]; then
+        pip install --user matplotlib
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user matplotlib
+    fi
 elif [ $mpl = "git" ]; then
-	cd "$build_dir"
-	git clone git://github.com/matplotlib/matplotlib.git
-	cd matplotlib
-	if [ $p2k = true ]; then
-		rm -Rf build
-		python2 setup.py install --user 
-	fi
-	if [ $p3k = true ]; then
-		rm -Rf build
-		python3 setup.py install --user 
-	fi
+    cd "$build_dir"
+    git clone git://github.com/matplotlib/matplotlib.git
+    cd matplotlib
+    if [ $p2k = true ]; then
+        rm -Rf build
+        python2 setup.py install --user
+    fi
+    if [ $p3k = true ]; then
+        rm -Rf build
+        python3 setup.py install --user
+    fi
 fi
 
 ## ## ## ## ##
 ##  PANDAS  ##
 ## ## ## ## ##
 if [ $pd = "repo" ]; then
-	if [ $p2k = true ]; then
-		sudo apt-get install python-pandas python-pandas-lib
-	fi
-	if [ $p3k = true ]; then
-		sudo apt-get install python3-pandas python3-pandas-lib
-	fi
+    if [ $p2k = true ]; then
+        sudo apt-get install python-pandas python-pandas-lib
+    fi
+    if [ $p3k = true ]; then
+        sudo apt-get install python3-pandas python3-pandas-lib
+    fi
 elif [ $pd = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user pandas
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user pandas
-	fi
+    if [ $p2k = true ]; then
+        pip install --user pandas
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user pandas
+    fi
 elif [ $pd = "git" ]; then
-	cd "$build_dir"
-	git clone git://github.com/pydata/pandas.git
-	cd pandas
-	if [ $p2k = true ]; then
-		rm -Rf build
-		python2 setup.py install --user 
-	fi
-	if [ $p3k = true ]; then
-		rm -Rf build
-		python3 setup.py install --user 
-	fi
+    cd "$build_dir"
+    git clone git://github.com/pydata/pandas.git
+    cd pandas
+    if [ $p2k = true ]; then
+        rm -Rf build
+        python2 setup.py install --user
+    fi
+    if [ $p3k = true ]; then
+        rm -Rf build
+        python3 setup.py install --user
+    fi
 fi
 
 ## ## ## ## ## ## ##
 ##  SCIKIT-LEARN  ##
 ## ## ## ## ## ## ##
 if [ $skl = "repo" ]; then
-	if [ $p2k = true ]; then
-		sudo apt-get install python-sklearn python-sklearn-lib
-	fi
-	if [ $p3k = true ]; then
-		## NOTE: no python3-* versions in repos (2014-11-25)
-		sudo apt-get install python-sklearn python-sklearn-lib
-	fi
+    if [ $p2k = true ]; then
+        sudo apt-get install python-sklearn python-sklearn-lib
+    fi
+    if [ $p3k = true ]; then
+        ## NOTE: no python3-* versions in repos (2014-11-25)
+        sudo apt-get install python-sklearn python-sklearn-lib
+    fi
 elif [ $skl = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user scikit-learn
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user scikit-learn
-	fi
+    if [ $p2k = true ]; then
+        pip install --user scikit-learn
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user scikit-learn
+    fi
 elif [ $skl = "git" ]; then
-	cd "$build_dir"
-	git clone git://github.com/scikit-learn/scikit-learn.git
-	cd scikit-learn
-	if [ $p2k = true ]; then
-		rm -Rf build
-		python2 setup.py install --user 
-	fi
-	if [ $p3k = true ]; then
-		rm -Rf build
-		python3 setup.py install --user 
-	fi
+    cd "$build_dir"
+    git clone git://github.com/scikit-learn/scikit-learn.git
+    cd scikit-learn
+    if [ $p2k = true ]; then
+        rm -Rf build
+        python2 setup.py install --user
+    fi
+    if [ $p3k = true ]; then
+        rm -Rf build
+        python3 setup.py install --user
+    fi
 fi
 
 ## ## ## ## ##
 ## SEABORN  ##
 ## ## ## ## ##
 if [ $sea = "repo" ]; then
-	if [ $p2k = true ]; then
-		sudo apt-get install python-patsy python-statsmodels \
-		python-statsmodels-lib python-seaborn
-	fi
-	if [ $p3k = true ]; then
-		## NOTE: no p3k version of statsmodels in repo (2014-11-25)
-		pip3 install --user statsmodels
-		sudo apt-get install python3-patsy python3-seaborn
-	fi
+    if [ $p2k = true ]; then
+        sudo apt-get install python-patsy python-statsmodels \
+        python-statsmodels-lib python-seaborn
+    fi
+    if [ $p3k = true ]; then
+        ## NOTE: no p3k version of statsmodels in repo (2014-11-25)
+        pip3 install --user statsmodels
+        sudo apt-get install python3-patsy python3-seaborn
+    fi
 elif [ $sea = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user patsy statsmodels seaborn
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user patsy statsmodels seaborn
-	fi
+    if [ $p2k = true ]; then
+        pip install --user patsy statsmodels seaborn
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user patsy statsmodels seaborn
+    fi
 elif [ $sea = "git" ]; then
-	cd "$build_dir"
-	git clone git://github.com/pydata/patsy.git
-	git clone git://github.com/statsmodels/statsmodels.git
-	git clone git://github.com/mwaskom/seaborn.git
-	for name in patsy statsmodels seaborn; do
-		cd "$build_dir/$name"
-		if [ $p2k = true ]; then
-			rm -Rf build
-			python2 setup.py install --user
-		fi
-		if [ $p3k = true ]; then
-			rm -Rf build
-			python3 setup.py install --user
-		fi
-	done
+    cd "$build_dir"
+    git clone git://github.com/pydata/patsy.git
+    git clone git://github.com/statsmodels/statsmodels.git
+    git clone git://github.com/mwaskom/seaborn.git
+    for name in patsy statsmodels seaborn; do
+        cd "$build_dir/$name"
+        if [ $p2k = true ]; then
+            rm -Rf build
+            python2 setup.py install --user
+        fi
+        if [ $p3k = true ]; then
+            rm -Rf build
+            python3 setup.py install --user
+        fi
+    done
 fi
 
 ## ## ## ## ## ## ##
 ##  SCIKITS.CUDA  ##
 ## ## ## ## ## ## ##
 if [ $skc = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user scikits.cuda
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user scikits.cuda
-	fi
+    if [ $p2k = true ]; then
+        pip install --user scikits.cuda
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user scikits.cuda
+    fi
 elif [ $skc = "git" ]; then
-	cd "$build_dir"
-	git clone git://github.com/lebedov/scikits.cuda.git
-	cd scikits.cuda
-	if [ $p2k = true ]; then
-		rm -Rf build
-		python2 setup.py install --user 
-	fi
-	if [ $p3k = true ]; then
-		rm -Rf build
-		python3 setup.py install --user 
-	fi
+    cd "$build_dir"
+    git clone git://github.com/lebedov/scikits.cuda.git
+    cd scikits.cuda
+    if [ $p2k = true ]; then
+        rm -Rf build
+        python2 setup.py install --user
+    fi
+    if [ $p3k = true ]; then
+        rm -Rf build
+        python3 setup.py install --user
+    fi
 fi
 
 ## ## ## ##
 ## TDTPY ##
 ## ## ## ##
 if [ $tdt = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user TDTPy
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user TDTPy
-	fi
+    if [ $p2k = true ]; then
+        pip install --user TDTPy
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user TDTPy
+    fi
 elif [ $tdt = "git" ]; then
-	cd "$build_dir"
-	hg clone https://bitbucket.org/bburan/tdtpy
-	cd tdtpy
-	if [ $p2k = true ]; then
-		rm -Rf build
-		python2 setup.py install --user 
-	fi
-	if [ $p3k = true ]; then
-		rm -Rf build
-		python3 setup.py install --user 
-	fi
+    cd "$build_dir"
+    hg clone https://bitbucket.org/bburan/tdtpy
+    cd tdtpy
+    if [ $p2k = true ]; then
+        rm -Rf build
+        python2 setup.py install --user
+    fi
+    if [ $p3k = true ]; then
+        rm -Rf build
+        python3 setup.py install --user
+    fi
 fi
 
 ## ## ## ## ## ##
 ##  SVG UTILS  ##
 ## ## ## ## ## ##
 if [ $svgu = "repo" ]; then
-	if [ $p2k = true ]; then
-		sudo apt-get install python-cairosvg python-cssselect
-		pip install --user tinycss cairocffi svgutils
-	fi
-	if [ $p3k = true ]; then
-		sudo apt-get install python3-cairosvg
-		pip3 install --user tinycss cssselect cairocffi svgutils
-	fi
+    if [ $p2k = true ]; then
+        sudo apt-get install python-cairosvg python-cssselect
+        pip install --user tinycss cairocffi svgutils
+    fi
+    if [ $p3k = true ]; then
+        sudo apt-get install python3-cairosvg
+        pip3 install --user tinycss cssselect cairocffi svgutils
+    fi
 elif [ $svgu = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user tinycss cssselect cairocffi cairosvg svgutils
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user tinycss cssselect cairocffi cairosvg svgutils
-	fi
+    if [ $p2k = true ]; then
+        pip install --user tinycss cssselect cairocffi cairosvg svgutils
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user tinycss cssselect cairocffi cairosvg svgutils
+    fi
 elif [ $svgu = "git" ]; then
-	cd "$build_dir"
-	git clone git://github.com/SimonSapin/tinycss.git
-	git clone git://github.com/SimonSapin/cssselect.git
-	git clone git://github.com/SimonSapin/cairocffi.git
-	git clone git://github.com/Kozea/CairoSVG.git
-	git clone git://github.com/btel/svg_utils.git
-	for name in tinycss cssseleect cairocffi CairoSVG svg_utils; do
-		cd "$build_dir/$name"
-		if [ $p2k = true ]; then
-			rm -Rf build
-			python2 setup.py install --user
-		fi
-		if [ $p3k = true ]; then
-			rm -Rf build
-			python3 setup.py install --user
-		fi
-	done
+    cd "$build_dir"
+    git clone git://github.com/SimonSapin/tinycss.git
+    git clone git://github.com/SimonSapin/cssselect.git
+    git clone git://github.com/SimonSapin/cairocffi.git
+    git clone git://github.com/Kozea/CairoSVG.git
+    git clone git://github.com/btel/svg_utils.git
+    for name in tinycss cssseleect cairocffi CairoSVG svg_utils; do
+        cd "$build_dir/$name"
+        if [ $p2k = true ]; then
+            rm -Rf build
+            python2 setup.py install --user
+        fi
+        if [ $p3k = true ]; then
+            rm -Rf build
+            python3 setup.py install --user
+        fi
+    done
 fi
 
 ## ## ## ## ## ## ## ## ## ## ## ##
 ## INKSCAPE, GIMP, IMAGE MAGICK  ##
 ## ## ## ## ## ## ## ## ## ## ## ##
 if [ $ink = true ]; then
-	sudo apt-get install inkscape
+    sudo apt-get install inkscape
 fi
 if [ $gimp = true ]; then
-	sudo apt-get install gimp
+    sudo apt-get install gimp
 fi
 if [ $magick = true ]; then
-	sudo apt-get install libmagickwand-dev
+    sudo apt-get install libmagickwand-dev
 fi
 
 ## ## ## ## ##
 ##  SPYDER  ##
 ## ## ## ## ##
 if [ $spyder = "repo" ]; then
-	if [ $p2k = true ]; then
-		sudo apt-get install python-rope python-flake8 python-sphinx \
-		pylint pyflakes python-sip python-qt4 spyder
-	fi
-	if [ $p3k = true ]; then
-		sudo apt-get install python3-rope python3-flake8 \
-		python3-sphinx pylint pyflakes python3-sip python3-pyqt4 spyder3
-	fi
+    if [ $p2k = true ]; then
+        sudo apt-get install python-rope python-flake8 python-sphinx \
+        pylint pyflakes python-sip python-qt4 spyder
+    fi
+    if [ $p3k = true ]; then
+        sudo apt-get install python3-rope python3-flake8 \
+        python3-sphinx pylint pyflakes python3-sip python3-pyqt4 spyder3
+    fi
 elif [ $spyder = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user rope flake8 sphinx pylint
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user rope_py3k flake8 sphinx pylint
-	fi
+    if [ $p2k = true ]; then
+        pip install --user rope flake8 sphinx pylint
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user rope_py3k flake8 sphinx pylint
+    fi
 elif [ $spyder = "git" ]; then
-	cd "$build_dir"
-	hg clone https://spyderlib.googlecode.com/hg/ spyderlib
-	cd spyderlib
-	if [ $p2k = true ]; then
-		rm -Rf build
-		python2 setup.py install --user
-	fi
-	if [ $p3k = true ]; then
-		rm -Rf build
-		python3 setup.py install --user
-	fi
-	## to update spyder:
-	# cd "$build_dir/spyder"
-	# hg pull --update
-	# python2 setup.py install --user
-	# python3 setup.py install --user
+    cd "$build_dir"
+    hg clone https://spyderlib.googlecode.com/hg/ spyderlib
+    cd spyderlib
+    if [ $p2k = true ]; then
+        rm -Rf build
+        python2 setup.py install --user
+    fi
+    if [ $p3k = true ]; then
+        rm -Rf build
+        python3 setup.py install --user
+    fi
+    ## to update spyder:
+    # cd "$build_dir/spyder"
+    # hg pull --update
+    # python2 setup.py install --user
+    # python3 setup.py install --user
 fi
 
 ## ## ## ## ##
 ##  JOBLIB  ##
 ## ## ## ## ##
 if [ $joblib = "repo" ]; then
-	if [ $p2k = true ]; then
-		sudo apt-get install python-joblib
-	fi
-	if [ $p3k = true ]; then
-		sudo apt-get install python3-joblib
-	fi
+    if [ $p2k = true ]; then
+        sudo apt-get install python-joblib
+    fi
+    if [ $p3k = true ]; then
+        sudo apt-get install python3-joblib
+    fi
 elif [ $joblib = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user joblib
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user joblib
-	fi
+    if [ $p2k = true ]; then
+        pip install --user joblib
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user joblib
+    fi
 elif [ $joblib = "git" ]; then
-	cd "$build_dir"
-	git clone git://github.com/joblib/joblib.git
-	cd joblib
-	if [ $p2k = true ]; then
-		rm -Rf build
-		python2 setup.py install --user
-	fi
-	if [ $p3k = true ]; then
-		rm -Rf build
-		python3 setup.py install --user
-	fi
+    cd "$build_dir"
+    git clone git://github.com/joblib/joblib.git
+    cd joblib
+    if [ $p2k = true ]; then
+        rm -Rf build
+        python2 setup.py install --user
+    fi
+    if [ $p3k = true ]; then
+        rm -Rf build
+        python3 setup.py install --user
+    fi
 fi
 
 ## ## ## ## ##
 ##  PYGLET  ##
 ## ## ## ## ##
 if [ $pyglet = "repo" ]; then
-	if [ $p2k = true ]; then
-		sudo apt-get install python-pyglet
-	fi
-	if [ $p3k = true ]; then
-		## no separate pk3 version
-		sudo apt-get install python-pyglet
-	fi
+    if [ $p2k = true ]; then
+        sudo apt-get install python-pyglet
+    fi
+    if [ $p3k = true ]; then
+        ## no separate pk3 version
+        sudo apt-get install python-pyglet
+    fi
 elif [ $pyglet = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user pyglet
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user pyglet
-	fi
+    if [ $p2k = true ]; then
+        pip install --user pyglet
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user pyglet
+    fi
 elif [ $pyglet = "git" ]; then
-	pip install --user --upgrade http://pyglet.googlecode.com/archive/tip.zip
+    pip install --user --upgrade http://pyglet.googlecode.com/archive/tip.zip
 fi
 
 ## ## ## ## ##
@@ -733,20 +733,20 @@ fi
 ## ## ## ## ##
 cd "$build_dir"
 if [ $expyfun = "user" ]; then
-	git clone git@github.com:LABSN/expyfun.git
-	cd expyfun
-	directive="install"
+    git clone git@github.com:LABSN/expyfun.git
+    cd expyfun
+    directive="install"
 elif [ $expyfun = "dev" ]; then
-	git clone git@github.com:$github_username/expyfun.git
-	cd expyfun
-	git remote add upstream git@github.com:LABSN/expyfun.git
-	directive="develop"
+    git clone git@github.com:$github_username/expyfun.git
+    cd expyfun
+    git remote add upstream git@github.com:LABSN/expyfun.git
+    directive="develop"
 fi
 if [ $p2k = true ]; then
-	python2 setup.py $directive --user
+    python2 setup.py $directive --user
 fi
 if [ $p3k = true ]; then
-	python3 setup.py $directive --user
+    python3 setup.py $directive --user
 fi
 
 ## ## ## ## ##
@@ -754,42 +754,42 @@ fi
 ## ## ## ## ##
 cd "$build_dir"
 if [ $mnefun = "user" ]; then
-	git clone git@github.com:LABSN/mnefun.git
-	cd mnefun
-	directive="install"
+    git clone git@github.com:LABSN/mnefun.git
+    cd mnefun
+    directive="install"
 elif [ $mnefun = "dev" ]; then
-	git clone git@github.com:$github_username/mnefun.git
-	cd mnefun
-	git remote add upstream git@github.com:LABSN/mnefun.git
-	directive="develop"
+    git clone git@github.com:$github_username/mnefun.git
+    cd mnefun
+    git remote add upstream git@github.com:LABSN/mnefun.git
+    directive="develop"
 fi
 if [ $p2k = true ]; then
-	python2 setup.py $directive --user
+    python2 setup.py $directive --user
 fi
 if [ $p3k = true ]; then
-	python3 setup.py $directive --user
+    python3 setup.py $directive --user
 fi
 
 ## ## ## ## ## ##
 ## MNE-PYTHON  ##
 ## ## ## ## ## ##
 if [ $mnepy = "pip" ]; then
-	if [ $p2k = true ]; then
-		pip install --user mne
-	fi
-	if [ $p3k = true ]; then
-		pip3 install --user mne
-	fi
+    if [ $p2k = true ]; then
+        pip install --user mne
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user mne
+    fi
 elif [ $mnepy = "git" ]; then
-	cd "$build_dir"
-	git clone git://github.com/mne-tools/mne-python.git
-	cd mne-python
-	if [ $p2k = true ]; then
-		python2 setup.py install --user
-	fi
-	if [ $p3k = true ]; then
-		python3 setup.py install --user
-	fi
+    cd "$build_dir"
+    git clone git://github.com/mne-tools/mne-python.git
+    cd mne-python
+    if [ $p2k = true ]; then
+        python2 setup.py install --user
+    fi
+    if [ $p3k = true ]; then
+        python3 setup.py install --user
+    fi
 fi
 
 ## ## ##
@@ -808,37 +808,37 @@ Rscript -e "install.packages(c('tidyr', 'devtools', 'ez', 'ggplot2', \
 ## JULIA ##
 ## ## ## ##
 if [ $julia = "ppa" ]; then
-	#codename=$(lsb_release -c -s)
-	#sudo echo "deb http://ppa.launchpad.net/staticfloat/juliareleases/\
-	#ubuntu $codename main" >> /etc/apt/sources.list
-	#sudo echo "deb-src http://ppa.launchpad.net/staticfloat/\
-	#juliareleases/ubuntu $codename main" >> /etc/apt/sources.list
-	sudo add-apt-repository ppa:staticfloat/juliareleases
-	sudo apt-get update
-	sudo apt-get install julia
+    #codename=$(lsb_release -c -s)
+    #sudo echo "deb http://ppa.launchpad.net/staticfloat/juliareleases/\
+    #ubuntu $codename main" >> /etc/apt/sources.list
+    #sudo echo "deb-src http://ppa.launchpad.net/staticfloat/\
+    #juliareleases/ubuntu $codename main" >> /etc/apt/sources.list
+    sudo add-apt-repository ppa:staticfloat/juliareleases
+    sudo apt-get update
+    sudo apt-get install julia
 elif [ $julia = "git" ] || [ $julia = "mkl" ]; then
-	cd "$build_dir"
-	git clone git://github.com/JuliaLang/julia.git
-	cd julia
-	if [ $mkl = true ] && [ $julia = "mkl" ]; then
-		source "$mkl_prefix/mkl/bin/mklvars.sh" intel64 ilp64
-		export MKL_INTERFACE_LAYER=ILP64
-		echo USE_MKL = 1 >> Make.user
-	fi
-	make -j 6
-	make testall
-	echo export PATH="$(pwd):$PATH" >> ~/.bashrc
+    cd "$build_dir"
+    git clone git://github.com/JuliaLang/julia.git
+    cd julia
+    if [ $mkl = true ] && [ $julia = "mkl" ]; then
+        source "$mkl_prefix/mkl/bin/mklvars.sh" intel64 ilp64
+        export MKL_INTERFACE_LAYER=ILP64
+        echo USE_MKL = 1 >> Make.user
+    fi
+    make -j 6
+    make testall
+    echo export PATH="$(pwd):$PATH" >> ~/.bashrc
 fi
 
 ## ## ## ## ##
 ## R STUDIO ##
 ## ## ## ## ##
 if [ $rstudio = true ]; then
-	rstudio_deb="${rstudio_url##*/}"
-	cd
-	wget "$rstudio_url"
-	sudo dpkg -i "$rstudio_deb"
-	rm "$rstudio_deb"
+    rstudio_deb="${rstudio_url##*/}"
+    cd
+    wget "$rstudio_url"
+    sudo dpkg -i "$rstudio_deb"
+    rm "$rstudio_deb"
 fi
 
 ## ## ## ## ## ## ##
