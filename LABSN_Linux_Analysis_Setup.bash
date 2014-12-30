@@ -90,13 +90,16 @@ mnefun="user"
 ## that up, that you should run after this script succeeds.
 mnepy="pip"
 
-## NumExpr is a dependency of PyTables, but PyTables is no longer a
-## dependency of expyfun (it's been replaced by h5py), so those two
-## default to not being installed at all. If you decide to install them
-## anyway, options are "repo", "pip", or "git"; "mkl" is also an option
-## for numexpr.
-numexpr="none"
-pytables="none"
+## PYEPARSE: analysis of eye-tracking and pupillometry data. Its
+## dependencies are NumPy and h5py. Pyeparse is a quasi-dependency
+## of expyfun (since it is required by the pupillometry codeblocks),
+## but is not otherwise required for expyfun installation or normal
+## functioning. The only installation method supported is "git".
+## Pandas is a soft requirement of pyeparse (it speeds up I/O),
+## but is also general-purpose python data analysis library; options
+## for pandas are "repo", "pip", "git".
+pyeparse="none"
+pandas="repo"
 
 ## All of the following have the same choices: "repo", "pip", or "git".
 ## Note that scikit-learn does not have a separate python3 version in
@@ -110,7 +113,6 @@ pytables="none"
 ## really means using pip to install the latest development tarball from
 ## the dev repo, which is actually a google code site, not GitHub).
 mpl="repo"    # MATPLOTLIB: best-of-breed scientific plotting in python
-pd="repo"     # PANDAS: Python data analysis library
 skl="repo"    # SCIKIT-LEARN: machine learning algorithms in python
 sea="repo"    # SEABORN: data visualization package built atop matplotlib
 svgu="repo"   # SVG Utils: python tools for combining & manipulating SVGs
@@ -283,89 +285,6 @@ elif [ $numpy = "git" ] || [ $numpy = "mkl" ]; then
     fi
 fi
 
-## ## ## ## ##
-## NUMEXPR  ##
-## ## ## ## ##
-if [ $numexpr = "repo" ]; then
-    if [ $p2k = true ]; then
-        sudo apt-get install python-numexpr
-    fi
-    if [ $p3k = true ]; then
-        sudo apt-get install python3-numexpr
-    fi
-elif [ $numexpr = "pip" ]; then
-    if [ $p2k = true ]; then
-        pip install --user numexpr
-    fi
-    if [ $p3k = true ]; then
-        pip3 install --user numexpr
-    fi
-elif [ $numexpr = "git" ] || [ $numexpr = "mkl" ]; then
-    cd "$build_dir"
-    git clone git://github.com/pydata/numexpr.git
-    cd numexpr
-    rm -Rf build  ## in case rebuilding
-    if [ $mkl = true ] && [ $numexpr = "mkl" ]; then
-        ## generate site.cfg (same format as NumPy)
-        echo [mkl] > site.cfg
-        echo library_dirs = "$mkl_prefix/mkl/lib/intel64" >> site.cfg
-        echo include_dirs = "$mkl_prefix/mkl/include" >> site.cfg
-        echo mkl_libs = mkl_rt >> site.cfg
-        echo lapack_libs =   >> site.cfg
-    fi
-    if [ $p2k = true ]; then
-        python2 setup.py build
-        python2 setup.py install --user
-        #cd; python2 -c "import numexpr; numexpr.test()"
-        #cd "$build_dir/numexpr"
-    fi
-    if [ $p3k = true ]; then
-        python3 setup.py build
-        python3 setup.py install --user
-        #cd; python3 -c "import numexpr; numexpr.test()"
-    fi
-    ## NOTE: numexpr.test() fails if run within $build_dir/numexpr,
-    ## hence the cd to $HOME first
-fi
-
-## ## ## ## ##
-## PYTABLES ##
-## ## ## ## ##
-if [ $pytables = "repo" ]; then
-    if [ $p2k = true ]; then
-        sudo apt-get install python-tables python-tables-lib
-    fi
-    if [ $p3k = true ]; then
-        sudo apt-get install python3-tables python3-tables-lib
-    fi
-elif [ $pytables = "pip" ]; then
-    if [ $p2k = true ]; then
-        pip install --user tables
-    fi
-    if [ $p3k = true ]; then
-        pip3 install --user tables
-    fi
-elif [ $pytables = "git" ]; then
-    cd "$build_dir"
-    git clone git://github.com/PyTables/PyTables.git
-    cd PyTables
-    if [ $p2k = true ]; then
-        make clean
-        python2 setup.py build_ext --inplace
-        python2 setup.py install --user
-        #cd; python2 -c "import tables; tables.test()"
-        #cd "$build_dir"/PyTables
-    fi
-    if [ $p3k = true ]; then
-        make clean
-        python3 setup.py build_ext --inplace
-        python3 setup.py install --user
-        #cd; python3 -c "import tables; tables.test()"
-    fi
-    ## NOTE: tables.test() fails if run within $build_dir/PyTables,
-    ## hence the cd to $HOME first
-fi
-
 ## ## ## ##
 ## SCIPY ##
 ## ## ## ##
@@ -439,24 +358,41 @@ fi
 ## ## ## ## ##
 ##  PANDAS  ##
 ## ## ## ## ##
-if [ $pd = "repo" ]; then
+if [ $pandas = "repo" ]; then
     if [ $p2k = true ]; then
         sudo apt-get install python-pandas python-pandas-lib
     fi
     if [ $p3k = true ]; then
         sudo apt-get install python3-pandas python3-pandas-lib
     fi
-elif [ $pd = "pip" ]; then
+elif [ $pandas = "pip" ]; then
     if [ $p2k = true ]; then
         pip install --user pandas
     fi
     if [ $p3k = true ]; then
         pip3 install --user pandas
     fi
-elif [ $pd = "git" ]; then
+elif [ $pandas = "git" ]; then
     cd "$build_dir"
     git clone git://github.com/pydata/pandas.git
     cd pandas
+    if [ $p2k = true ]; then
+        rm -Rf build
+        python2 setup.py install --user
+    fi
+    if [ $p3k = true ]; then
+        rm -Rf build
+        python3 setup.py install --user
+    fi
+fi
+
+## ## ## ## ##
+## PYEPARSE ##
+## ## ## ## ##
+if [ $pyeparse = "git" ]; then
+    cd "$build_dir"
+    git clone git://github.com/pyeparse/pyeparse.git
+    cd pyeparse
     if [ $p2k = true ]; then
         rm -Rf build
         python2 setup.py install --user
