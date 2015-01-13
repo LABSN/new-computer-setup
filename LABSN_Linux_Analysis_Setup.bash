@@ -396,11 +396,9 @@ fi
 ## https://www.sr-support.com/showthread.php?16-EyeLink-Developers-Kit-for-Linux-%28Linux-Display-Software%29
 ## It can also be installed from this archive (but apt-get is easier):
 ## "http://download.sr-support.com/linuxDisplaySoftwareRelease/EyeLinkDisplaySoftware1.9_x64.tar.gz"
-sudo echo "deb http://download.sr-support.com/x64 /" >> /etc/apt/sources.list
+echo "deb http://download.sr-support.com/x64 /" | sudo tee -a /etc/apt/sources.list > /dev/null
 sudo apt-get update
-sudo apt-get install eyelink-display-software1.9
-# TODO: how to auto-install when packages can't be "verified"?
-# TODO: how to skip a dependency (eyelink-addtomenu just adds annoying top-level menu item)
+sudo apt-get -y install eyelink-display-software1.9
 
 ## ## ## ## ##
 ## PYEPARSE ##
