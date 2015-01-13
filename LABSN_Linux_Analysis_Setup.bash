@@ -91,14 +91,16 @@ mnefun="user"
 mnepy="pip"
 
 ## PYEPARSE: analysis of eye-tracking and pupillometry data. Its
-## dependencies are NumPy and h5py. Pyeparse is a quasi-dependency
-## of expyfun (since it is required by the pupillometry codeblocks),
-## but is not otherwise required for expyfun installation or normal
-## functioning. The only installation method supported is "git".
+## dependencies are NumPy, h5py, and the EyeLink drivers / libraries.
+## Pyeparse is a quasi-dependency of expyfun (since it is required by
+## the pupillometry codeblocks), but is not otherwise required for
+## expyfun installation or normal functioning. The only installation
+## method supported is "git".
 ## Pandas is a soft requirement of pyeparse (it speeds up I/O),
 ## but is also general-purpose python data analysis library; options
 ## for pandas are "repo", "pip", "git".
 pyeparse="none"
+eyelink="none"
 pandas="repo"
 
 ## All of the following have the same choices: "repo", "pip", or "git".
@@ -385,6 +387,18 @@ elif [ $pandas = "git" ]; then
         python3 setup.py install --user
     fi
 fi
+
+## ## ## ## ##
+## EYELINK  ##
+## ## ## ## ##
+## Install instructions adapted from the SR Research forums, accessible
+## by logging in to this website as "labsner" with the labsner password:
+## https://www.sr-support.com/showthread.php?16-EyeLink-Developers-Kit-for-Linux-%28Linux-Display-Software%29
+## It can also be installed from this archive (but apt-get is easier):
+## "http://download.sr-support.com/linuxDisplaySoftwareRelease/EyeLinkDisplaySoftware1.9_x64.tar.gz"
+echo "deb http://download.sr-support.com/x64 /" | sudo tee -a /etc/apt/sources.list > /dev/null
+sudo apt-get update
+sudo apt-get -y install eyelink-display-software1.9
 
 ## ## ## ## ##
 ## PYEPARSE ##
