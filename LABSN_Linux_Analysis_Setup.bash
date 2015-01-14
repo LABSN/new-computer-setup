@@ -745,14 +745,18 @@ fi
 ## ## ##
 ## R  ##
 ## ## ##
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
-codename=$(lsb_release -c -s)
-sudo echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" >> \
-/etc/apt/sources.list
-sudo apt-get update
-sudo apt-get install r-base r-base-dev
-Rscript -e "install.packages(c('tidyr', 'devtools', 'ez', 'ggplot2', \
-'Hmisc', 'lme4', 'plyr', 'reshape', 'stringi', 'zoo'))"
+if [ $rlang = "cran" ] || [ $rlang = "repo" ] ; then
+	if [ $rlang = "cran" ]; then
+		sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+		codename=$(lsb_release -c -s)
+		sudo echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" >> \
+		/etc/apt/sources.list
+	fi
+	sudo apt-get update
+	sudo apt-get install r-base r-base-dev libcurl4-openssh-dev
+	Rscript -e "install.packages(c('tidyr', 'devtools', 'ez', 'ggplot2', \
+	'Hmisc', 'lme4', 'plyr', 'reshape', 'stringi', 'zoo'))"
+fi
 
 ## ## ## ##
 ## JULIA ##
