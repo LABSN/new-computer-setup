@@ -134,7 +134,7 @@ tdt="none"  # TDTPY:  Python wrappers for TDT's Active-X interface
 ## The recommended IDE for R is RStudio, which currently serves up
 ## binaries from its own website rather than through the repos, so you
 ## need to provide the URL for the most current version here.
-rlang="cran"
+rlang="none"
 rstudio=false
 rstudio_url="http://download1.rstudio.org/rstudio-0.98.1091-amd64.deb"
 ## Options for Julia are "ppa", "git", and "mkl". The PPA is run by a
@@ -143,7 +143,7 @@ rstudio_url="http://download1.rstudio.org/rstudio-0.98.1091-amd64.deb"
 ## Linux is not compatible with the most recent version of Julia. There
 ## is a Julia plugin for the LightTable editor called Juno, that might
 ## be worth trying...
-julia="ppa"
+julia="none"
 #juliastudio=false
 #juliastudio_url="https://s3.amazonaws.com/cdn-common.forio.com/\
 #julia-studio/0.4.4/julia-studio-linux-64-0.4.4.tar.gz"
