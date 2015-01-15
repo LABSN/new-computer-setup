@@ -133,17 +133,17 @@ tdt="none"  # TDTPY:  Python wrappers for TDT's Active-X interface
 ## PPA but more trustworthy as the source is an offical CRAN mirror).
 ## The recommended IDE for R is RStudio, which currently serves up
 ## binaries from its own website rather than through the repos, so you
-## need to provide the URL for the most current version here. Options
-## for Julia are "ppa", "git", and "mkl". The PPA is run by a former
-## LABS^N member, and so is not really a risk/unknown like some PPAs
+## need to provide the URL for the most current version here.
+rlang="none"
+rstudio=false
+rstudio_url="http://download1.rstudio.org/rstudio-0.98.1091-amd64.deb"
+## Options for Julia are "ppa", "git", and "mkl". The PPA is run by a
+## former LABS^N member, so is not really a risk/unknown like some PPAs
 ## are. There is currently no mature IDE for Julia. JuliaStudio for
 ## Linux is not compatible with the most recent version of Julia. There
 ## is a Julia plugin for the LightTable editor called Juno, that might
 ## be worth trying...
-rlang="cran"
-rstudio=false
-rstudio_url="http://download1.rstudio.org/rstudio-0.98.1091-amd64.deb"
-julia="ppa"
+julia="none"
 #juliastudio=false
 #juliastudio_url="https://s3.amazonaws.com/cdn-common.forio.com/\
 #julia-studio/0.4.4/julia-studio-linux-64-0.4.4.tar.gz"
@@ -745,14 +745,16 @@ fi
 ## ## ##
 ## R  ##
 ## ## ##
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
-codename=$(lsb_release -c -s)
-sudo echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" >> \
-/etc/apt/sources.list
-sudo apt-get update
-sudo apt-get install r-base r-base-dev
-Rscript -e "install.packages(c('tidyr', 'devtools', 'ez', 'ggplot2', \
-'Hmisc', 'lme4', 'plyr', 'reshape', 'stringi', 'zoo'))"
+if [ $rlang = "cran" ] || [ $rlang = "repo" ] ; then
+	if [ $rlang = "cran" ]; then
+		sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+		codename=$(lsb_release -c -s)
+		sudo echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" >> \
+		/etc/apt/sources.list
+		sudo apt-get update
+	fi
+	sudo apt-get install r-base r-base-dev libcurl4-openssh-dev
+fi
 
 ## ## ## ##
 ## JULIA ##
