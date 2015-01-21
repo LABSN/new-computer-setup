@@ -166,7 +166,7 @@ magick=true
 sudo apt-get update
 sudo apt-get install default-jre build-essential git-core cmake bzip2 \
 liblzo2-2 liblzo2-dev zlib1g zlib1g-dev libfreetype6-dev libpng-dev \
-libxml2-dev libxslt1-dev
+libxml2-dev libxslt1-dev ssh-askpass
 if [ $p2k = true ]; then
     sudo apt-get install cython python-nose python-coverage \
     python-setuptools python-pip
@@ -749,11 +749,11 @@ if [ $rlang = "cran" ] || [ $rlang = "repo" ] ; then
 	if [ $rlang = "cran" ]; then
 		sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 		codename=$(lsb_release -c -s)
-		sudo echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" >> \
-		/etc/apt/sources.list
+		echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" | \
+		sudo tee /etc/apt/sources.list > /dev/null
 		sudo apt-get update
 	fi
-	sudo apt-get install r-base r-base-dev libcurl4-openssh-dev
+	sudo apt-get install r-base r-base-dev libcurl4-openssl-dev
 fi
 
 ## ## ## ##
