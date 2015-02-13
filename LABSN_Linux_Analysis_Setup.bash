@@ -779,7 +779,7 @@ if [ $rlang = "cran" ] || [ $rlang = "repo" ] ; then
 		sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 		codename=$(lsb_release -c -s)
 		echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" | \
-		sudo tee /etc/apt/sources.list > /dev/null
+		sudo tee -a /etc/apt/sources.list > /dev/null
 		sudo apt-get update
 	fi
 	sudo apt-get install r-base r-base-dev libcurl4-openssl-dev
