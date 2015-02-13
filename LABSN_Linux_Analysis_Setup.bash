@@ -90,6 +90,9 @@ mnefun="user"
 ## that up, that you should run after this script succeeds.
 mnepy="pip"
 
+## PYSURFER: cortical surface imaging library. Options: "pip" or "git".
+pysurf="pip"
+
 ## PYEPARSE: analysis of eye-tracking and pupillometry data. Its
 ## dependencies are NumPy, h5py, and the EyeLink drivers / libraries.
 ## Pyeparse is a quasi-dependency of expyfun (since it is required by
@@ -734,6 +737,32 @@ elif [ $mnepy = "git" ]; then
     cd "$build_dir"
     git clone git://github.com/mne-tools/mne-python.git
     cd mne-python
+    if [ $p2k = true ]; then
+        python2 setup.py install --user
+    fi
+    if [ $p3k = true ]; then
+        python3 setup.py install --user
+    fi
+fi
+
+## ## ## ## ##
+## PYSURFER ##
+## ## ## ## ##
+if [ $pysurf = "pip" ] || [ $pysurf = "git" ] ; then
+	sudo apt-get install python-pyface python-traits python-traitsui \
+	python-apptools python-configobj python-vtk libcudart5.5 mayavi2
+fi
+if [ $pysurf = "pip" ] ; then
+    if [ $p2k = true ]; then
+        pip install --user pysurfer
+    fi
+    if [ $p3k = true ]; then
+        pip3 install --user pysurfer
+    fi
+elif [ $pysurf = "git" ]; then
+    cd "$build_dir"
+    git clone git://github.com/nipy/pysurfer.git
+    cd pysurfer
     if [ $p2k = true ]; then
         python2 setup.py install --user
     fi
