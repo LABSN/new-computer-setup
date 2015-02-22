@@ -90,6 +90,12 @@ mnefun="user"
 ## that up, that you should run after this script succeeds.
 mnepy="pip"
 
+## PYSURFER: cortical surface imaging library. Options are "pip" or 
+## "git". PySurfer does not work with Python3 (because its dependencies
+## MayaVi and VTK do not). If you specify p2k=false and p3k=true,
+## pysurfer will not be installed.
+pysurf="pip"
+
 ## PYEPARSE: analysis of eye-tracking and pupillometry data. Its
 ## dependencies are NumPy, h5py, and the EyeLink drivers / libraries.
 ## Pyeparse is a quasi-dependency of expyfun (since it is required by
@@ -742,6 +748,25 @@ elif [ $mnepy = "git" ]; then
     fi
 fi
 
+## ## ## ## ##
+## PYSURFER ##
+## ## ## ## ##
+if [ $p2k = true ]; then
+	if [ $pysurf = "pip" ] || [ $pysurf = "git" ] ; then
+		sudo apt-get install python-pyface python-traits \
+		python-traitsui python-apptools python-configobj python-vtk \
+		libcudart5.5 mayavi2
+	fi
+	if [ $pysurf = "pip" ] ; then
+        pip install --user pysurfer
+	elif [ $pysurf = "git" ]; then
+		cd "$build_dir"
+		git clone git://github.com/nipy/pysurfer.git
+		cd pysurfer
+        python2 setup.py install --user
+    fi
+fi
+
 ## ## ##
 ## R  ##
 ## ## ##
@@ -750,7 +775,7 @@ if [ $rlang = "cran" ] || [ $rlang = "repo" ] ; then
 		sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 		codename=$(lsb_release -c -s)
 		echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" | \
-		sudo tee /etc/apt/sources.list > /dev/null
+		sudo tee -a /etc/apt/sources.list > /dev/null
 		sudo apt-get update
 	fi
 	sudo apt-get install r-base r-base-dev libcurl4-openssl-dev
