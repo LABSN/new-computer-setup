@@ -614,8 +614,8 @@ elif [ $spyder = "pip" ]; then
     fi
 elif [ $spyder = "git" ]; then
     cd "$build_dir"
-    hg clone https://spyderlib.googlecode.com/hg/ spyderlib
-    cd spyderlib
+    git clone https://github.com/spyder-ide/spyder
+    cd spyder
     if [ $p2k = true ]; then
         rm -Rf build
         python2 setup.py install --user
@@ -624,11 +624,6 @@ elif [ $spyder = "git" ]; then
         rm -Rf build
         python3 setup.py install --user
     fi
-    ## to update spyder:
-    # cd "$build_dir/spyder"
-    # hg pull --update
-    # python2 setup.py install --user
-    # python3 setup.py install --user
 fi
 
 ## ## ## ## ##
