@@ -1,0 +1,93 @@
+# This is a list of commands to be run when setting up a Windows system for
+# psychoacoustics at LABS^N. It is not much of a "script" in that it is mostly
+# instructions on what to download and double-click, and in what order.
+# However, there are a few lines of code runnable in Git Bash that will save
+# you some setup time. It is recommended that you proceed in serial order
+# (don't skip around).
+
+# MATLAB
+# this has to be installed by I-LABS I.T. staff (for licensing reasons). It is
+# recommended to do this first, in case anything goes wrong and the machine
+# needs to be wiped.
+
+# PSYCHTOOLBOX
+# Prerequisites: install SVN, GStreamer, & "MS Visual C++ 2010 redistributable"
+# from downloadable EXEs (these links are current as of 2015 December):
+# https://sliksvn.com/download/
+# http://gstreamer.freedesktop.org/
+# https://www.microsoft.com/en-us/download/details.aspx?id=14632
+# After that, follow the instructions at http://psychtoolbox.org/
+
+# MISCELLANEOUS PROGRAMS: install from downloadable EXEs
+# 7zip: http://www.7-zip.org/
+# VirtualCloneDrive: http://www.slysoft.com/en/virtual-clonedrive.html
+# Git Bash: https://git-scm.com/downloads
+# Miniconda (python 2.7, 64-bit): http://conda.pydata.org/miniconda.html
+# NOTE: make sure when you install miniconda to select "add to PATH" during
+# installation so that python / conda become available in Git Bash terminals.
+# Audacity: http://audacityteam.org/
+# Praat: http://praat.org/
+# NOTE: praat.exe is *the* standalone app; there is no "installer".  Copy it to
+# a sensible place where it won't get accidentally deleted, and add a shortcut
+# to the start menu / desktop.
+
+# TDT
+# Install the TDT drivers and ActiveX controls **from the CD**.  There is an ISO
+# of the on LESTER (login required) that you can mount with "VirtualCloneDrive":
+# https://lester.ilabs.uw.edu/dav/labdocs/ISOs/
+# After installing, go to the TDT downloads page and download the installers
+# for the "TDT drivers" and the "ActiveX controls", and run them to upgrade what
+# was installed from the CD. This 2-step process is necessary because the
+# downloadable installer for the ActiveX controls requires a password if it
+# doesn't detect an existing installed version.
+
+# VARIOUS PYTHON MODULES
+# run this in a Git Bash terminal:
+conda install numpy scipy matplotlib pywin32 nose h5py spyder
+pip install pyglet TDTPy
+
+# SPYDER
+# Spyder is installed above via conda (so that all its dependencies are there),
+# but now we remove it and install from downloaded EXE so we get menu
+# integration, etc. Run this in a Git Bash terminal:
+conda remove spyder
+# now install via EXE from https://github.com/spyder-ide/spyder/releases
+
+# PYTHON MODULES NOT AVAILABLE THROUGH CONDA / PIP
+# expyfun, pyeparse, mne-python, h5io
+# These are all going in ~/Builds. Run these lines in a Git Bash terminal:
+cd
+mkdir Builds
+
+# expyfun
+cd ~/Builds
+git clone https://github.com/LABSN/expyfun.git
+cd expyfun
+python setup.py develop
+
+# pyeparse
+cd ~/Builds
+git clone https://github.com/pyeparse/pyeparse.git
+cd pyeparse
+python setup.py install
+
+# mne-python
+cd ~/Builds
+git clone https://github.com/mne-tools/mne-python.git
+cd mne-python
+python setup.py install
+
+# h5io
+cd ~/Builds
+git clone https://github.com/h5io/h5io.git
+cd h5io
+python setup.py install
+
+# OTHER CUSTOMIZATIONS
+# adding "make" to Git Bash (NOTE: this didn't work):
+# http://sourceforge.net/projects/mingw/files/MSYS/Base/make/make-3.81-3/
+# unzip (twice) with 7-zip, rename bin-make.exe to make.exe and move to
+# C:\Users\labuser\AppData\Local\Programs\Git\bin
+
+# SETTING UP WEBDAV ACCESS TO LESTER
+# TODO
