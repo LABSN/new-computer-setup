@@ -5,13 +5,12 @@
 # you some setup time. It is recommended that you proceed in serial order
 # (don't skip around).
 
-# MATLAB
-# this has to be installed by I-LABS I.T. staff (for licensing reasons). It is
-# recommended to do this first, in case anything goes wrong and the machine
-# needs to be wiped.
-
-# PSYCHTOOLBOX
-# Prerequisites: install SVN, GStreamer, & "MS Visual C++ 2010 redistributable"
+# MATLAB & PSYCHTOOLBOX
+# If you need MATLAB, it has to be installed by I-LABS I.T. staff (for
+# licensing reasons). It is recommended to do this first, in case anything
+# goes wrong and the machine needs to be wiped.
+# PsychToolbox prerequisites:
+# install SVN, GStreamer, & "MS Visual C++ 2010 redistributable"
 # from downloadable EXEs (these links are current as of 2015 December):
 # https://sliksvn.com/download/
 # http://gstreamer.freedesktop.org/
@@ -41,6 +40,12 @@
 # downloadable installer for the ActiveX controls requires a password if it
 # doesn't detect an existing installed version.
 
+# EYELINK
+# Even if you're not connecting this computer to an EyeLink, it should have
+# the EyeLink Developer's Kit installed (it's a dependency for pyeparse).
+# Get it here (requires login; use the lab low-security credentials):
+# https://www.sr-support.com/showthread.php?6-EyeLink-Developers-Kit-for-Windows-%28Windows-Display-Software%29
+
 # VARIOUS PYTHON MODULES
 # run this in a Git Bash terminal:
 conda install numpy scipy matplotlib pywin32 nose h5py spyder
@@ -69,19 +74,19 @@ python setup.py develop
 cd ~/Builds
 git clone https://github.com/pyeparse/pyeparse.git
 cd pyeparse
-python setup.py install
+python setup.py develop
 
 # mne-python
 cd ~/Builds
 git clone https://github.com/mne-tools/mne-python.git
 cd mne-python
-python setup.py install
+python setup.py develop
 
 # h5io
 cd ~/Builds
 git clone https://github.com/h5io/h5io.git
 cd h5io
-python setup.py install
+python setup.py develop
 
 # OTHER CUSTOMIZATIONS
 # adding "make" to Git Bash (NOTE: this didn't work):
@@ -90,4 +95,6 @@ python setup.py install
 # C:\Users\labuser\AppData\Local\Programs\Git\bin
 
 # SETTING UP WEBDAV ACCESS TO LESTER
-# TODO
+# Setup access to LESTER using the Windows "Add Network Drive" wizard.
+# Here is the URL: https://lester.ilabs.uw.edu/dav/labdocs
+# LESTER uses the low-security lab credentials for login.
