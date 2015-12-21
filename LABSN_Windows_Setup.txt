@@ -48,7 +48,7 @@
 
 # VARIOUS PYTHON MODULES
 # run this in a Git Bash terminal:
-conda install numpy scipy matplotlib pywin32 nose h5py spyder
+conda install numpy scipy matplotlib pandas pywin32 nose h5py spyder
 pip install pyglet TDTPy
 
 # SPYDER
