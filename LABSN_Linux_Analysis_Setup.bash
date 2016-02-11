@@ -145,14 +145,10 @@ rstudio=false
 rstudio_url="http://download1.rstudio.org/rstudio-0.98.1091-amd64.deb"
 ## Options for Julia are "ppa", "git", and "mkl". The PPA is run by a
 ## former LABS^N member, so is not really a risk/unknown like some PPAs
-## are. There is currently no mature IDE for Julia. JuliaStudio for
-## Linux is not compatible with the most recent version of Julia. There
-## is a Julia plugin for the LightTable editor called Juno, that might
-## be worth trying...
+## are. Juno is the best IDE for Julia at present
 julia="none"
-#juliastudio=false
-#juliastudio_url="https://s3.amazonaws.com/cdn-common.forio.com/\
-#julia-studio/0.4.4/julia-studio-linux-64-0.4.4.tar.gz"
+juno=false
+junourl="https://junolab.s3.amazonaws.com/release/1.0.2/juno-linux-x64.zip"
 
 ## IMAGE PROCESSING APPS: inkscape, gimp, & image magick are useful for
 ## figure creation and image processing. Bleeding-edge versions are not
@@ -813,17 +809,18 @@ if [ $rstudio = true ]; then
     rm "$rstudio_deb"
 fi
 
-## ## ## ## ## ## ##
-##  JULIA STUDIO  ##
-## ## ## ## ## ## ##
-#if [ $juliastudio = true ]; then
-#	juliastudio_archive="${juliastudio_url##*/}"
-#	juliastudio_folder="${juliastudio_archive%.tar.gz}"
-#	cd
-#	wget "$juliastudio_url"
-#	tar -zxf "$juliastudio_archive"
-#	cd "$juliastudio_folder"
-#	## TODO: do the installation
-#	rm "~/$juliastudio_archive"
-#	rm -Rf "~/$juliastudio_folder"
-#fi
+## ## ## ##
+##  JUNO ##
+## ## ## ##
+if [ $juno = true ]; then
+	juno_archive="${juno_url##*/}"
+	juno_folder="${juno_archive%.zip}"
+    cd "$build_dir"
+	wget "$juno_url"
+	unzip "$juno_archive"
+	cd "$juno_folder"
+    echo export PATH="$(pwd):$PATH" >> ~/.bashrc
+	cd ..
+	rm "$juno_archive"
+	rm -Rf "$juno_folder"
+fi
