@@ -46,6 +46,13 @@
 # Get it here (requires login; use the lab low-security credentials):
 # https://www.sr-support.com/showthread.php?6-EyeLink-Developers-Kit-for-Windows-%28Windows-Display-Software%29
 
+# AVBIN
+# AVbin is a wrapper around encoding/decoding libraries, necessary for pyglet
+# to be able to read compressed audio/video. Check the website
+# (http://avbin.github.io/AVbin/Download.html) to make sure the URL below
+# is the most current version, and install via EXE:
+# https://github.com/downloads/AVbin/AVbin/AVbin10-win64.exe
+
 # VARIOUS PYTHON MODULES
 # run this in a Git Bash terminal:
 conda install numpy scipy matplotlib pandas pywin32 nose h5py spyder

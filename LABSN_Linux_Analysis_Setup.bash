@@ -109,6 +109,16 @@ pyeparse="none"
 eyelink="none"
 pandas="repo"
 
+## AVBIN: a wrapper around linux encoding/decoding libraries, necessary
+## for pyglet to be able to read compressed audio/video. Options are
+## "repo" and "git" (though here "git" does not mean to clone and build
+## from source, but rather to download the most recent binary installer
+## from the AVbin downloads page on GitHub). Check the website
+## (http://avbin.github.io/AVbin/Download.html) to make sure the URL below
+## is the most current version if using install option "git".
+avbin="repo"
+avbinurl="https://github.com/downloads/AVbin/AVbin/install-avbin-linux-x86-64-v10"
+
 ## All of the following have the same choices: "repo", "pip", or "git".
 ## Note that scikit-learn does not have a separate python3 version in
 ## the repos, so the p2k and p3k options do not differ for that package.
@@ -655,6 +665,20 @@ elif [ $joblib = "git" ]; then
         rm -Rf build
         python3 setup.py install --user
     fi
+fi
+
+## ## ## ##
+## AVBIN ##
+## ## ## ##
+if [ $avbin = "repo" ]; then
+	sudo apt-get install avbin0 avbin-dev
+elif [ $avbin = "git" ]; then
+	cd "$build_dir"
+	wget $avbinurl
+	avbininstaller="${avbinurl##*/}"
+	## accept the GPL
+	echo Y | sudo ./$avbininstaller --nox11
+	rm $avbininstaller
 fi
 
 ## ## ## ## ##
