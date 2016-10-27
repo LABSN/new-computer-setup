@@ -23,4 +23,5 @@ sudo mdadm --assemble $raid_loc $raid_one $raid_two
 MOUNTPT="/media/raid"
 sudo mkdir $MOUNTPT
 UUID=$(sudo blkid $raid_loc | cut -d '"' -f2)
-sudo echo "UUID=$UUID $MOUNTPT ext4 defaults 0 0" >> /etc/fstab
+echo "# THE RAID" | sudo tee -a /etc/fstab > /dev/null
+echo "UUID=$UUID $MOUNTPT ext4 defaults 0 0" | sudo tee -a /etc/fstab > /dev/null
